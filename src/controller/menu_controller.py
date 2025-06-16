@@ -12,7 +12,6 @@ class MenuController:
         self.start_game = False
 
     def handle_events(self) -> bool:
-        """Обрабатывает события меню"""
         mouse_pos = pygame.mouse.get_pos()
         mouse_click = pygame.mouse.get_pressed()[0]
 
@@ -32,25 +31,24 @@ class MenuController:
                             return False
 
             elif self.model.current_menu == "settings":
+                # Обработка слайдеров
+                slider_changed = False
                 for slider in self.model.settings_sliders:
-                    slider.handle_event(event)
-
-                for picker in self.model.color_pickers:
-                    if picker.handle_event(event):
-                        self.model.active_color_picker = picker
-                        # Обновляем слайдеры RGB при выборе пикера
-                        for i in range(3):
-                            self.model.color_components[i].value = picker.color[i]
-
-                if self.model.active_color_picker:
-                    for i, slider in enumerate(self.model.color_components):
-                        if slider.handle_event(event):
-                            self.model.active_color_picker.color[i] = int(slider.value)
-
+                    if slider.handle_event(event):
+                        slider_changed = True
+                
+                if slider_changed:
+                    self.model.apply_settings_immediately()
+                    continue
+                
+                # Обработка сброса
                 for button in self.model.settings_buttons:
                     button.check_hover(mouse_pos)
                     if button.is_clicked(mouse_pos, mouse_click):
-                        if button.text == "Сохранить":
+                        if button.text == "Сброс":
+                            self.model.reset_to_default()  # Полный сброс
+                            continue
+                        elif button.text == "Сохранить":
                             self.model.save_settings()
                         elif button.text == "Назад":
                             self.model.current_menu = "main"

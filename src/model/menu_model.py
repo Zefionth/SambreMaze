@@ -29,8 +29,9 @@ class MenuModel:
             Slider(150, 200, 200, 20, 1, 10, self.settings['player_speed'], "Скорость игрока"),
             Slider(150, 250, 200, 20, 50, 300, self.settings['fog_radius'], "Радиус видимости"),
             Slider(150, 300, 200, 20, 500, 5000, self.settings['point_lifetime'], "Время жизни точек"),
-            Slider(150, 350, 200, 20, 10, 100, self.settings['white_scan_cooldown'], "КД белого скана"),
-            Slider(150, 400, 200, 20, 100, 1000, self.settings['red_scan_cooldown'], "КД красного скана")
+            Slider(150, 350, 200, 20, 10, 100, self.settings['locator_cooldown'], "КД локатора"),
+            Slider(150, 400, 200, 20, 100, 1000, self.settings['detector_cooldown'], "КД детектора"),
+            Slider(150, 450, 200, 20, 30, 300, self.settings.get('timer_duration', 120), "Длительность таймера (сек)")
         ]
 
         # Цветовые пикеры
@@ -40,8 +41,8 @@ class MenuModel:
             ColorPicker(450, 290, 50, 50, self.settings['colors']['walls'], "Стены"),
             ColorPicker(450, 360, 50, 50, self.settings['colors']['exit'], "Выход"),
             ColorPicker(450, 430, 50, 50, self.settings['colors']['danger'], "Опасность"),
-            ColorPicker(550, 150, 50, 50, self.settings['colors']['scan'], "Скан"),
-            ColorPicker(550, 220, 50, 50, self.settings['colors']['red_scan'], "Красный скан")
+            ColorPicker(550, 150, 50, 50, self.settings['colors']['locator'], "Локатор"),
+            ColorPicker(550, 220, 50, 50, self.settings['colors']['detector'], "Детектор")
         ]
 
         # RGB слайдеры для активного цветового пикера
@@ -59,6 +60,16 @@ class MenuModel:
                  "Назад", Config.RED, (200, 50, 50))
         ]
 
+        # Кнопка сброса
+        self.settings_buttons = [
+        Button(center_x - 210, 500, 100, 50,
+              "Сброс", Config.GRAY, (150, 150, 150)),
+        Button(center_x - 100, 500, 200, 50,
+              "Сохранить", Config.GREEN, (50, 200, 50)),
+        Button(center_x - 100, 570, 200, 50,
+              "Назад", Config.RED, (200, 50, 50))
+        ]
+
     def save_settings(self):
         """Сохраняет текущие настройки в файл"""
         self.settings = {
@@ -66,16 +77,95 @@ class MenuModel:
             'player_speed': float(self.settings_sliders[1].value),
             'fog_radius': int(self.settings_sliders[2].value),
             'point_lifetime': int(self.settings_sliders[3].value),
-            'white_scan_cooldown': int(self.settings_sliders[4].value),
-            'red_scan_cooldown': int(self.settings_sliders[5].value),
+            'locator_cooldown': int(self.settings_sliders[4].value),
+            'detector_cooldown': int(self.settings_sliders[5].value),
             'colors': {
                 'background': self.color_pickers[0].color,
                 'player': self.color_pickers[1].color,
                 'walls': self.color_pickers[2].color,
                 'exit': self.color_pickers[3].color,
                 'danger': self.color_pickers[4].color,
-                'scan': self.color_pickers[5].color,
-                'red_scan': self.color_pickers[6].color
+                'locator': self.color_pickers[5].color,
+                'detector': self.color_pickers[6].color
             }
         }
         Config.save_settings(self.settings)
+    
+    def reset_to_default(self):
+        """Сбрасывает настройки к значениям по умолчанию"""
+        default = Config.DEFAULT_SETTINGS
+        
+        # Сбрасываем слайдеры
+        self.settings_sliders[0].value = default['player_radius']
+        self.settings_sliders[1].value = default['player_speed']
+        self.settings_sliders[2].value = default['fog_radius']
+        self.settings_sliders[3].value = default['point_lifetime']
+        self.settings_sliders[4].value = default['locator_cooldown']
+        self.settings_sliders[5].value = default['detector_cooldown']
+        
+        # Обновляем слайдеры цветов
+        if self.active_color_picker:
+            self.update_color_sliders()
+        
+        # Сбрасываем слайдеры
+        self.settings_sliders = [
+            Slider(150, 150, 200, 20, 5, 20, default['player_radius'], "Размер игрока"),
+            Slider(150, 200, 200, 20, 1, 10, default['player_speed'], "Скорость игрока"),
+            Slider(150, 250, 200, 20, 50, 300, default['fog_radius'], "Радиус видимости"),
+            Slider(150, 300, 200, 20, 500, 5000, default['point_lifetime'], "Время жизни точек"),
+            Slider(150, 350, 200, 20, 10, 100, default['locator_cooldown'], "КД локатора"),
+            Slider(150, 400, 200, 20, 100, 1000, default['detector_cooldown'], "КД детектора"),
+            Slider(150, 450, 200, 20, 5, 300, default['timer_duration'], "Длительность таймера (сек)")
+        ]
+        
+        # Сбрасываем цвета
+        self.color_pickers = [
+            ColorPicker(450, 150, 50, 50, default['colors']['background'], "Фон"),
+            ColorPicker(450, 220, 50, 50, default['colors']['player'], "Игрок"),
+            ColorPicker(450, 290, 50, 50, default['colors']['walls'], "Стены"),
+            ColorPicker(450, 360, 50, 50, default['colors']['exit'], "Выход"),
+            ColorPicker(450, 430, 50, 50, default['colors']['danger'], "Опасность"),
+            ColorPicker(550, 150, 50, 50, default['colors']['locator'], "Локатор"),
+            ColorPicker(550, 220, 50, 50, default['colors']['detector'], "Детектор")
+        ]
+        
+        # Сбрасываем RGB слайдеры
+        self.color_components = [
+            Slider(650, 150, 200, 20, 0, 255, 0, "R"),
+            Slider(650, 200, 200, 20, 0, 255, 0, "G"),
+            Slider(650, 250, 200, 20, 0, 255, 0, "B")
+        ]
+        
+        self.active_color_picker = None
+        
+        # Применяем изменения
+        self.apply_settings_immediately()
+
+    def update_color_sliders(self):
+        """Обновляет слайдеры RGB при выборе цветового пикера"""
+        if self.active_color_picker:
+            for i in range(3):
+                self.color_components[i].value = self.active_color_picker.color[i]
+    
+    def apply_settings_immediately(self):
+        """Применяет настройки с проверкой всех ключей"""
+        temp_settings = {
+            'player_radius': int(self.settings_sliders[0].value),
+            'player_speed': float(self.settings_sliders[1].value),
+            'fog_radius': int(self.settings_sliders[2].value),
+            'point_lifetime': int(self.settings_sliders[3].value),
+            'locator_cooldown': int(self.settings_sliders[4].value),
+            'detector_cooldown': int(self.settings_sliders[5].value),
+            'timer_duration': int(self.settings_sliders[6].value),
+            'colors': {
+                'background': self.color_pickers[0].color,
+                'player': self.color_pickers[1].color,
+                'walls': self.color_pickers[2].color,
+                'exit': self.color_pickers[3].color,
+                'danger': self.color_pickers[4].color,
+                'locator': self.color_pickers[5].color,
+                'detector': self.color_pickers[6].color
+            }
+        }
+        if hasattr(self, 'game'):
+            self.game.apply_settings(temp_settings)

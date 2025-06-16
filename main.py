@@ -10,8 +10,9 @@ class Main:
         self.screen = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
         pygame.display.set_caption("Scanner Sombre: Invisible Walls")
         
-        self.menu_controller = MenuController(self.screen)
         self.game_controller = GameController(self.screen)
+        self.menu_controller = MenuController(self.screen)
+        self.menu_controller.model.game = self.game_controller
         
     def run(self):
         clock = pygame.time.Clock()

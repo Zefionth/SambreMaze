@@ -23,16 +23,17 @@ class Config:
         'player_speed': 3.5,
         'fog_radius': 150,
         'point_lifetime': 2500,
-        'white_scan_cooldown': 25,
-        'red_scan_cooldown': 500,
+        'timer_duration': 120,
+        'locator_cooldown': 25,
+        'detector_cooldown': 500,
         'colors': {
             'background': DARK,
             'player': WHITE,
             'walls': WHITE,
             'exit': GREEN,
             'danger': RED,
-            'scan': WHITE,
-            'red_scan': RED
+            'locator': WHITE,
+            'detector': RED
         }
     }
         
@@ -48,3 +49,5 @@ class Config:
     @classmethod
     def save_settings(cls, settings: dict) -> None:
         """Сохраняет текущие настройки в JSON файл"""
+        with open('settings.json', 'w') as f:
+            json.dump(settings, f, indent=4)

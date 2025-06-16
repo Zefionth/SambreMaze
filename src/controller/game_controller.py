@@ -2,8 +2,8 @@
 import pygame
 import math
 from src.model.game_model import GameModel
-from src.view.game_view import GameView
 from src.model.particle import Particle
+from src.view.game_view import GameView
 from src.config import Config
 
 class GameController:
@@ -28,10 +28,10 @@ class GameController:
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # ЛКМ - белый скан
+                if event.button == 1:  # ЛКМ - локатор
                     self.model.left_mouse_down = True
-                elif event.button == 3:  # ПКМ - красный скан
-                    self.handle_red_scan(current_time, mouse_pos)
+                elif event.button == 3:  # ПКМ - детектор
+                    self.handle_detector_scan(current_time, mouse_pos)
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.model.left_mouse_down = False
@@ -42,15 +42,15 @@ class GameController:
 
         return True
 
-    def handle_red_scan(self, current_time, mouse_pos):
-        """Обрабатывает активацию красного скана"""
-        if current_time - self.model.last_red_scan_time > self.settings['red_scan_cooldown']:
-            self.model.last_red_scan_time = current_time
+    def handle_detector_scan(self, current_time, mouse_pos):
+        """Обрабатывает активацию детектора"""
+        if current_time - self.model.last_detector_time > self.settings['detector_cooldown']:
+            self.model.last_detector_time = current_time
             angle = math.atan2(mouse_pos[1]-self.model.player.pos[1], 
                              mouse_pos[0]-self.model.player.pos[0])
             
             # Создаем волну сканирования
-            wave_points, hit_positions = self.model.add_red_scan_wave(
+            wave_points, hit_positions = self.model.add_detector_wave(
                 self.model.player.pos, angle)
             
             # Границы конуса сканирования
@@ -72,7 +72,7 @@ class GameController:
                 ))
 
             # Добавляем скан в модель
-            self.model.red_scan_lines.append({
+            self.model.detector_lines.append({
                 'points': wave_points,
                 'left_bound': left_bound,
                 'right_bound': right_bound,
@@ -84,10 +84,33 @@ class GameController:
 
             # Добавляем эффекты для обнаруженных опасных зон
             for pos in hit_positions:
-                self.model.red_points.append((*pos, current_time))
+                self.model.detector_points.append((*pos, current_time))
                 self.model.particles.append(Particle(
                     pos[0], pos[1], 
                     self.settings['colors']['danger'], 2, 1.0))
+                
+    def apply_settings(self, settings):
+        """Применяет настройки с обновлением слайдеров"""
+        self.settings = settings
+        
+        # Основные настройки
+        self.model.player.radius = settings.get('player_radius', 10)
+        self.model.player.speed = settings.get('player_speed', 3.5)
+        self.model.player.speed_diagonal = self.model.player.speed * 0.7071
+        self.model.player.color = settings['colors']['player']
+        
+        # Параметры игры
+        self.fog_radius = settings.get('fog_radius', 150)
+        self.point_lifetime = settings.get('point_lifetime', 2500)
+        self.locator_cooldown = settings.get('locator_cooldown', 25)
+        self.detector_cooldown = settings.get('detector_cooldown', 500)
+        self.model.timer_duration = settings.get('timer_duration', 120)
+        self.colors = settings['colors']
+        
+        # Полный сброс таймера
+        self.model.timer_start = pygame.time.get_ticks()
+        self.model.show_path = False
+        self.model.path = []
 
     def check_ui_buttons(self, mouse_pos):
         """Проверяет нажатия на кнопки интерфейса"""
@@ -108,14 +131,18 @@ class GameController:
             player=self.model.player,
             maze=self.model.maze,
             thin_walls=self.model.thin_walls,
-            red_zones=self.model.red_zones,
+            danger_zones=self.model.danger_zones,
             particles=self.model.particles,
-            white_points=self.model.white_points,
-            red_points=self.model.red_points,
-            red_scan_lines=self.model.red_scan_lines,
+            locator_points=self.model.locator_points,
+            detector_points=self.model.detector_points,
+            detector_lines=self.model.detector_lines,
             game_won=self.model.game_won,
             game_over=self.model.game_over,
             colors=self.settings['colors'],
             fog_radius=self.settings['fog_radius'],
-            cell_size=self.model.cell_size
+            cell_size=self.model.cell_size,
+            timer_start=self.model.timer_start,
+            timer_duration=self.model.timer_duration,
+            show_path=self.model.show_path,
+            path=self.model.path
         )

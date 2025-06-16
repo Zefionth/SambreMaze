@@ -1,0 +1,45 @@
+{
+    "player_radius": 10,
+    "player_speed": 3.5,
+    "fog_radius": 150,
+    "point_lifetime": 2500,
+    "locator_cooldown": 25,
+    "detector_cooldown": 500,
+    "colors": {
+        "background": [
+            15,
+            15,
+            25
+        ],
+        "player": [
+            255,
+            255,
+            255
+        ],
+        "walls": [
+            255,
+            255,
+            255
+        ],
+        "exit": [
+            100,
+            255,
+            100
+        ],
+        "danger": [
+            255,
+            80,
+            80
+        ],
+        "locator": [
+            255,
+            255,
+            255
+        ],
+        "detector": [
+            255,
+            80,
+            80
+        ]
+    }
+}

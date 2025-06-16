@@ -1,6 +1,5 @@
 """Модель игрока"""
-import math
-from typing import Tuple
+
 from src.config import Config
 
 class Player:
