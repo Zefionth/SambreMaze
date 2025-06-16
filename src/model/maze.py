@@ -61,4 +61,4 @@ class MazeGenerator:
                        (y>0 and maze[y-1][x]==0) or (y<rows-1 and maze[y+1][x]==0):
                         thin_walls[y][x] = 1
         
-        return thin_walls, maze, red_zones, cell_size, 2
+        return thin_walls, maze, red_zones, cell_size

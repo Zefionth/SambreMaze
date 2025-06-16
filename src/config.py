@@ -48,5 +48,3 @@ class Config:
     @classmethod
     def save_settings(cls, settings: dict) -> None:
         """Сохраняет текущие настройки в JSON файл"""
-        with open('settings.json', 'w') as f:
-            json.dump(settings, f, indent=4)

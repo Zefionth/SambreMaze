@@ -1,1 +1,0 @@
-{"player_radius": 5, "player_speed": 3.9250000000000003, "fog_radius": 300, "point_lifetime": 2500, "white_scan_cooldown": 10, "red_scan_cooldown": 100, "colors": {"background": [0, 0, 0], "player": [255, 255, 255], "walls": [255, 126, 0], "exit": [100, 255, 86], "danger": [255, 80, 44], "scan": [0, 255, 255], "red_scan": [255, 82, 105]}}
