@@ -13,11 +13,8 @@ class GameModel:
         self.settings = settings
         self.reset()
 
-        self.timer_duration = settings.get('timer_duration', 120)
-        self.timer_start = 0
         self.show_path = False
         self.path = []
-        self.path_show_time = 0
     
     def reset(self):
         self.player = Player(self.settings)
@@ -34,11 +31,9 @@ class GameModel:
         self.last_locator_time = 0
         self.last_detector_time = 0
         self.left_mouse_down = False
-
-        self.timer_start = pygame.time.get_ticks()
+        
         self.show_path = False
         self.path = []
-        self.path_show_time = 0
     
     def get_wall_normal(self, cell_x: int, cell_y: int, hit_x: float, hit_y: float) -> Tuple[int, int]:
         cell_left = cell_x * self.cell_size
@@ -110,19 +105,6 @@ class GameModel:
     def update(self, dt: float, mouse_pos: Tuple[int, int], keys_pressed: List[bool]):
         current_time = pygame.time.get_ticks()
 
-        # Таймер
-        elapsed = (current_time - self.timer_start) // 1000
-        if elapsed >= self.timer_duration and not self.show_path:
-            self.show_path = True
-            self.path_show_time = current_time
-            self.find_path_to_exit()
-            self.timer_start = current_time  # Сбрасываем таймер
-        
-        # Скрываем путь через 1 секунду
-        if self.show_path and current_time - self.path_show_time > 1000:
-            self.show_path = False
-            self.path = []
-        
         # Локаторное сканирование
         if self.left_mouse_down and current_time - self.last_locator_time > self.settings['locator_cooldown']:
             self.last_locator_time = current_time

@@ -13,6 +13,7 @@ class GameController:
         self.model = GameModel(self.settings)
         self.view = GameView(screen)
         self.return_to_menu = False
+        self.show_path = False
 
     def start_game(self):
         """Начинает новую игру"""
@@ -28,17 +29,25 @@ class GameController:
             if event.type == pygame.QUIT:
                 return False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # ЛКМ - локатор
-                    self.model.left_mouse_down = True
+                if event.button == 1:  # ЛКМ
+                    # Проверка кнопок интерфейса
+                    if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Restart
+                        self.start_game()
+                    elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Menu
+                        self.return_to_menu = True
+                    elif 230 <= mouse_pos[0] <= 330 and 10 <= mouse_pos[1] <= 40:  # Show Path
+                        self.show_path = not self.show_path
+                        if self.show_path:
+                            self.model.find_path_to_exit()
+                        else:
+                            self.model.path = []
+                    else:
+                        self.model.left_mouse_down = True
                 elif event.button == 3:  # ПКМ - детектор
                     self.handle_detector_scan(current_time, mouse_pos)
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.model.left_mouse_down = False
-
-        # Проверка кнопок интерфейса
-        if pygame.mouse.get_pressed()[0]:
-            self.check_ui_buttons(pygame.mouse.get_pos())
 
         return True
 
@@ -104,14 +113,8 @@ class GameController:
         self.point_lifetime = settings.get('point_lifetime', 2500)
         self.locator_cooldown = settings.get('locator_cooldown', 25)
         self.detector_cooldown = settings.get('detector_cooldown', 500)
-        self.model.timer_duration = settings.get('timer_duration', 120)
         self.colors = settings['colors']
         
-        # Полный сброс таймера
-        self.model.timer_start = pygame.time.get_ticks()
-        self.model.show_path = False
-        self.model.path = []
-
     def check_ui_buttons(self, mouse_pos):
         """Проверяет нажатия на кнопки интерфейса"""
         if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Restart
@@ -141,8 +144,6 @@ class GameController:
             colors=self.settings['colors'],
             fog_radius=self.settings['fog_radius'],
             cell_size=self.model.cell_size,
-            timer_start=self.model.timer_start,
-            timer_duration=self.model.timer_duration,
             show_path=self.model.show_path,
             path=self.model.path
         )

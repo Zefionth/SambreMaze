@@ -31,7 +31,6 @@ class MenuModel:
             Slider(150, 300, 200, 20, 500, 5000, self.settings['point_lifetime'], "Время жизни точек"),
             Slider(150, 350, 200, 20, 10, 100, self.settings['locator_cooldown'], "КД локатора"),
             Slider(150, 400, 200, 20, 100, 1000, self.settings['detector_cooldown'], "КД детектора"),
-            Slider(150, 450, 200, 20, 30, 300, self.settings.get('timer_duration', 120), "Длительность таймера (сек)")
         ]
 
         # Цветовые пикеры
@@ -73,22 +72,22 @@ class MenuModel:
     def save_settings(self):
         """Сохраняет текущие настройки в файл"""
         self.settings = {
-            'player_radius': int(self.settings_sliders[0].value),
-            'player_speed': float(self.settings_sliders[1].value),
-            'fog_radius': int(self.settings_sliders[2].value),
-            'point_lifetime': int(self.settings_sliders[3].value),
-            'locator_cooldown': int(self.settings_sliders[4].value),
-            'detector_cooldown': int(self.settings_sliders[5].value),
-            'colors': {
-                'background': self.color_pickers[0].color,
-                'player': self.color_pickers[1].color,
-                'walls': self.color_pickers[2].color,
-                'exit': self.color_pickers[3].color,
-                'danger': self.color_pickers[4].color,
-                'locator': self.color_pickers[5].color,
-                'detector': self.color_pickers[6].color
-            }
+        'player_radius': int(self.settings_sliders[0].value),
+        'player_speed': float(self.settings_sliders[1].value),
+        'fog_radius': int(self.settings_sliders[2].value),
+        'point_lifetime': int(self.settings_sliders[3].value),
+        'locator_cooldown': int(self.settings_sliders[4].value),
+        'detector_cooldown': int(self.settings_sliders[5].value),
+        'colors': {
+            'background': self.color_pickers[0].color,
+            'player': self.color_pickers[1].color,
+            'walls': self.color_pickers[2].color,
+            'exit': self.color_pickers[3].color,
+            'danger': self.color_pickers[4].color,
+            'locator': self.color_pickers[5].color,
+            'detector': self.color_pickers[6].color
         }
+}
         Config.save_settings(self.settings)
     
     def reset_to_default(self):
@@ -109,15 +108,14 @@ class MenuModel:
         
         # Сбрасываем слайдеры
         self.settings_sliders = [
-            Slider(150, 150, 200, 20, 5, 20, default['player_radius'], "Размер игрока"),
-            Slider(150, 200, 200, 20, 1, 10, default['player_speed'], "Скорость игрока"),
-            Slider(150, 250, 200, 20, 50, 300, default['fog_radius'], "Радиус видимости"),
-            Slider(150, 300, 200, 20, 500, 5000, default['point_lifetime'], "Время жизни точек"),
-            Slider(150, 350, 200, 20, 10, 100, default['locator_cooldown'], "КД локатора"),
-            Slider(150, 400, 200, 20, 100, 1000, default['detector_cooldown'], "КД детектора"),
-            Slider(150, 450, 200, 20, 5, 300, default['timer_duration'], "Длительность таймера (сек)")
+        Slider(150, 150, 200, 20, 5, 20, self.settings['player_radius'], "Размер игрока"),
+        Slider(150, 200, 200, 20, 1, 10, self.settings['player_speed'], "Скорость игрока"),
+        Slider(150, 250, 200, 20, 50, 300, self.settings['fog_radius'], "Радиус видимости"),
+        Slider(150, 300, 200, 20, 500, 5000, self.settings['point_lifetime'], "Время жизни точек"),
+        Slider(150, 350, 200, 20, 10, 100, self.settings['locator_cooldown'], "КД локатора"),
+        Slider(150, 400, 200, 20, 100, 1000, self.settings['detector_cooldown'], "КД детектора")
         ]
-        
+            
         # Сбрасываем цвета
         self.color_pickers = [
             ColorPicker(450, 150, 50, 50, default['colors']['background'], "Фон"),
@@ -156,7 +154,6 @@ class MenuModel:
             'point_lifetime': int(self.settings_sliders[3].value),
             'locator_cooldown': int(self.settings_sliders[4].value),
             'detector_cooldown': int(self.settings_sliders[5].value),
-            'timer_duration': int(self.settings_sliders[6].value),
             'colors': {
                 'background': self.color_pickers[0].color,
                 'player': self.color_pickers[1].color,

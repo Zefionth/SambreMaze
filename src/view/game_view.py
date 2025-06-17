@@ -9,7 +9,7 @@ class GameView:
         self.screen = screen
         self.font = pygame.font.SysFont('Arial', 24)
         self.font_large = pygame.font.SysFont('Arial', 48)
-        self.fog_surface = None
+        self.fog_surface = pygame.Surface((Config.WIDTH, Config.HEIGHT), pygame.SRCALPHA)
 
     def _ensure_color(self, color, alpha=255):
         """Гарантирует корректный формат цвета (R, G, B, A)"""
@@ -20,31 +20,13 @@ class GameView:
         return color[:4]  # Берем только первые 4 компонента если цвет длиннее
 
     def draw(self, player, maze, thin_walls, danger_zones, particles, 
-        locator_points, detector_points, detector_lines, game_won, 
-        game_over, colors, fog_radius, cell_size, timer_start, 
-        timer_duration, show_path, path):
+    locator_points, detector_points, detector_lines, game_won, 
+    game_over, colors, fog_radius, cell_size, show_path, path):
         """Отрисовывает текущее игровое состояние"""
         current_time = pygame.time.get_ticks()
-        
-        # Таймер с контрастным фоном
-        elapsed = (current_time - timer_start) // 1000
-        remaining = max(0, timer_duration - elapsed)
-        timer_text = f"{remaining // 60}:{remaining % 60:02d}"
-        
-        # Создаем подложку для таймера
-        timer_bg = pygame.Surface((80, 30), pygame.SRCALPHA)
-        timer_bg.fill((0, 0, 0, 180))  # Полупрозрачный черный фон
-        
-        # Выбираем контрастный цвет (белый или черный) в зависимости от фона
-        bg_color = colors['background']
-        if isinstance(bg_color, list):
-            bg_color = tuple(bg_color)
-        brightness = sum(bg_color[:3])/3
-        timer_color = (0, 0, 0) if brightness > 127 else (255, 255, 255)
-        
-        self.screen.blit(timer_bg, (Config.WIDTH - 90, 5))
-        timer_surface = self.font.render(timer_text, True, timer_color)
-        self.screen.blit(timer_surface, (Config.WIDTH - 85, 10))
+
+        # Очистка экрана
+        self.screen.fill(self._ensure_color(colors['background']))
 
         # Отрисовка пути
         if show_path and path:
@@ -54,9 +36,6 @@ class GameView:
                 x2 = path[i+1][0] * cell_size + cell_size // 2
                 y2 = path[i+1][1] * cell_size + cell_size // 2
                 pygame.draw.line(self.screen, colors['exit'], (x1, y1), (x2, y2), 3)
-        
-        # Очистка экрана
-        self.screen.fill(self._ensure_color(colors['background']))
 
         # Создаем туман войны
         self._create_fog(player.pos, fog_radius)
@@ -93,7 +72,6 @@ class GameView:
         self._draw_ui_buttons()
 
         pygame.display.flip()
-
     def _create_fog(self, player_pos, fog_radius):
         """Создает поверхность для тумана войны"""
         self.fog_surface = pygame.Surface((Config.WIDTH, Config.HEIGHT), pygame.SRCALPHA)
@@ -184,11 +162,11 @@ class GameView:
     def _draw_game_status(self, game_won, game_over, colors):
         """Отрисовывает сообщения о победе/поражении"""
         if game_won:
-            text = self.font_large.render("YOU ESCAPED!", True, self._ensure_color(colors['exit'])[:3])
+            text = self.font_large.render("ТЫ ПОБЕДИЛ!", True, self._ensure_color(colors['exit'])[:3])
             self.screen.blit(text, (Config.WIDTH//2-text.get_width()//2, 
                                   Config.HEIGHT//2-text.get_height()//2))
         elif game_over:
-            text = self.font_large.render("GAME OVER", True, self._ensure_color(colors['danger'])[:3])
+            text = self.font_large.render("ИГРА ОКОНЧЕНА", True, self._ensure_color(colors['danger'])[:3])
             self.screen.blit(text, (Config.WIDTH//2-text.get_width()//2, 
                                   Config.HEIGHT//2-text.get_height()//2))
 
@@ -199,11 +177,18 @@ class GameView:
         pygame.draw.rect(self.screen, Config.WHITE, restart_rect)
         text = self.font.render("Рестарт", True, Config.BLACK)
         self.screen.blit(text, (restart_rect.centerx-text.get_width()//2, 
-                          restart_rect.centery-text.get_height()//2))
+                        restart_rect.centery-text.get_height()//2))
 
         # Кнопка Menu
         menu_rect = pygame.Rect(120, 10, 100, 30)
         pygame.draw.rect(self.screen, Config.WHITE, menu_rect)
         text = self.font.render("Меню", True, Config.BLACK)
         self.screen.blit(text, (menu_rect.centerx-text.get_width()//2, 
-                          menu_rect.centery-text.get_height()//2))
+                        menu_rect.centery-text.get_height()//2))
+        
+        # Кнопка Show Path
+        path_rect = pygame.Rect(230, 10, 100, 30)
+        pygame.draw.rect(self.screen, Config.WHITE, path_rect)
+        text = self.font.render("Путь", True, Config.BLACK)
+        self.screen.blit(text, (path_rect.centerx-text.get_width()//2, 
+                        path_rect.centery-text.get_height()//2))

@@ -23,7 +23,6 @@ class Config:
         'player_speed': 3.5,
         'fog_radius': 150,
         'point_lifetime': 2500,
-        'timer_duration': 120,
         'locator_cooldown': 25,
         'detector_cooldown': 500,
         'colors': {
