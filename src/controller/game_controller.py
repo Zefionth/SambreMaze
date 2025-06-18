@@ -36,8 +36,8 @@ class GameController:
                     elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Menu
                         self.return_to_menu = True
                     elif 230 <= mouse_pos[0] <= 330 and 10 <= mouse_pos[1] <= 40:  # Show Path
-                        self.show_path = not self.show_path
-                        if self.show_path:
+                        self.model.show_path = not self.model.show_path
+                        if self.model.show_path:
                             self.model.find_path_to_exit()
                         else:
                             self.model.path = []
@@ -103,23 +103,26 @@ class GameController:
         self.settings = settings
         
         # Основные настройки
-        self.model.player.radius = settings.get('player_radius', 10)
-        self.model.player.speed = settings.get('player_speed', 3.5)
+        self.model.player.radius = settings['player_radius']
+        self.model.player.speed = settings['player_speed']
         self.model.player.speed_diagonal = self.model.player.speed * 0.7071
         self.model.player.color = settings['colors']['player']
         
-        # Параметры игры
-        self.fog_radius = settings.get('fog_radius', 150)
-        self.point_lifetime = settings.get('point_lifetime', 2500)
-        self.locator_cooldown = settings.get('locator_cooldown', 25)
-        self.detector_cooldown = settings.get('detector_cooldown', 500)
-        self.colors = settings['colors']
+        # Обновляем все параметры в модели игры
+        self.model.settings = settings.copy()
+        
+        # Если игра активна, применяем настройки к текущей сессии
+        if not self.model.game_over and not self.model.game_won:
+            self.model.player.radius = settings['player_radius']
+            self.model.player.speed = settings['player_speed']
+            self.model.player.speed_diagonal = self.model.player.speed * 0.7071
+            self.model.player.color = settings['colors']['player']
         
     def check_ui_buttons(self, mouse_pos):
         """Проверяет нажатия на кнопки интерфейса"""
-        if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Restart
+        if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Рестарт
             self.start_game()
-        elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Menu
+        elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Меню
             self.return_to_menu = True
 
     def update(self, dt: float):
@@ -130,20 +133,21 @@ class GameController:
 
     def draw(self):
         """Отрисовывает игровое состояние"""
-        self.view.draw(
-            player=self.model.player,
-            maze=self.model.maze,
-            thin_walls=self.model.thin_walls,
-            danger_zones=self.model.danger_zones,
-            particles=self.model.particles,
-            locator_points=self.model.locator_points,
-            detector_points=self.model.detector_points,
-            detector_lines=self.model.detector_lines,
-            game_won=self.model.game_won,
-            game_over=self.model.game_over,
-            colors=self.settings['colors'],
-            fog_radius=self.settings['fog_radius'],
-            cell_size=self.model.cell_size,
-            show_path=self.model.show_path,
-            path=self.model.path
-        )
+        game_state = {
+            'player': self.model.player,
+            'maze': self.model.maze,
+            'thin_walls': self.model.thin_walls,
+            'danger_zones': self.model.danger_zones,
+            'particles': self.model.particles,
+            'locator_points': self.model.locator_points,
+            'detector_points': self.model.detector_points,
+            'detector_lines': self.model.detector_lines,
+            'game_won': self.model.game_won,
+            'game_over': self.model.game_over,
+            'colors': self.settings['colors'],
+            'fog_radius': self.settings['fog_radius'],
+            'cell_size': self.model.cell_size,
+            'show_path': self.model.show_path,
+            'path': self.model.path
+        }
+        self.view.draw(game_state)

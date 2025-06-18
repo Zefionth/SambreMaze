@@ -31,6 +31,28 @@ class MenuController:
                             return False
 
             elif self.model.current_menu == "settings":
+                # Обработка цветовых пикеров
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for picker in self.model.color_pickers:
+                        if picker.rect.collidepoint(event.pos):
+                            self.model.active_color_picker = picker
+                            self.model.update_color_sliders()
+                            self.model.apply_settings_immediately()
+                            break
+                
+                # Обработка RGB слайдеров для активного пикера
+                if self.model.active_color_picker:
+                    color_changed = False
+                    for slider in self.model.color_components:
+                        if slider.handle_event(event):
+                            color_changed = True
+                    if color_changed:
+                        r = int(self.model.color_components[0].value)
+                        g = int(self.model.color_components[1].value)
+                        b = int(self.model.color_components[2].value)
+                        self.model.active_color_picker.color = [r, g, b]
+                        self.model.apply_settings_immediately()
+
                 # Обработка слайдеров
                 slider_changed = False
                 for slider in self.model.settings_sliders:
@@ -58,6 +80,8 @@ class MenuController:
     def update(self, dt: float):
         """Обновляет состояние меню"""
         pass  # В текущей реализации не требуется
+
+    
 
     def draw(self):
         """Отрисовывает меню"""
