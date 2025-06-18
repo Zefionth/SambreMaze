@@ -3,6 +3,7 @@ import pygame
 import math
 from pygame import gfxdraw
 from src.config import Config
+from src.utils import normalize_color, center_text, draw_circle
 
 class GameView:
     def __init__(self, screen):
@@ -19,6 +20,7 @@ class GameView:
         """Инициализация поверхностей для эффектов"""
         self.fog_surface = pygame.Surface((Config.WIDTH, Config.HEIGHT), pygame.SRCALPHA)
         self.pulse_time = 0
+        self.fog_surface.fill((0, 0, 0, Config.FOG_ALPHA))
         
     def draw(self, game_state):
         """Основной метод отрисовки игрового состояния"""
@@ -26,11 +28,11 @@ class GameView:
         self._draw_game_world(game_state)
         self._draw_ui(game_state)
         pygame.display.flip()
-        self.pulse_time += 0.1
+        self.pulse_time += Config.PULSE_SPEED
         
     def _clear_screen(self, bg_color):
         """Очистка экрана с заданным цветом"""
-        self.screen.fill(self._normalize_color(bg_color))
+        self.screen.fill(normalize_color(bg_color))
         
     def _draw_game_world(self, game_state):
         """Отрисовка игрового мира"""
@@ -41,8 +43,20 @@ class GameView:
         self._draw_particles(game_state['particles'])
         self._draw_player(game_state['player'], game_state['colors']['player'])
         self._draw_exit(game_state['maze'], game_state['cell_size'], game_state['colors']['exit'])
-        self._draw_points(game_state['locator_points'], game_state['colors']['locator'], 1.5, 3)
-        self._draw_points(game_state['detector_points'], game_state['colors']['danger'], 2.0, 1)
+        self._draw_points(
+            game_state['locator_points'], 
+            game_state['colors']['locator'], 
+            Config.LOCATOR_PULSE_FACTOR, 
+            Config.LOCATOR_BASE_RADIUS,
+            game_state['point_lifetime']  # Добавлен параметр
+        )
+        self._draw_points(
+            game_state['detector_points'], 
+            game_state['colors']['danger'], 
+            Config.DETECTOR_PULSE_FACTOR, 
+            Config.DETECTOR_BASE_RADIUS,
+            game_state['point_lifetime']  # Добавлен параметр
+        )
         self._draw_detector_waves(game_state['detector_lines'], game_state['colors']['detector'])
         
         if self.fog_surface:
@@ -53,15 +67,9 @@ class GameView:
         self._draw_game_status(game_state['game_won'], game_state['game_over'], game_state['colors'])
         self._draw_ui_buttons()
         
-    def _normalize_color(self, color, alpha=255):
-        """Приведение цвета к единому формату (R, G, B, A)"""
-        if isinstance(color, list):
-            color = tuple(color)
-        return color if len(color) == 4 else (*color[:3], alpha)
-        
     def _create_fog(self, player_pos, fog_radius):
         """Создание эффекта тумана войны"""
-        self.fog_surface.fill((0, 0, 0, 200))
+        self.fog_surface.fill((0, 0, 0, Config.FOG_ALPHA))
         gfxdraw.filled_circle(
             self.fog_surface, 
             int(player_pos[0]), 
@@ -86,19 +94,19 @@ class GameView:
             )
             pygame.draw.line(
                 self.screen, 
-                self._normalize_color(color), 
+                normalize_color(color), 
                 start, 
                 end, 
-                3
+                Config.PATH_LINE_WIDTH
             )
             
-    def _draw_points(self, points, base_color, pulse_factor, base_radius):
+    def _draw_points(self, points, base_color, pulse_factor, base_radius, point_lifetime):
         """Отрисовка точек с эффектом пульсации"""
         current_time = pygame.time.get_ticks()
         
         for point in points:
             x, y, t = point
-            age = (current_time - t) / 2500  # Время жизни точек
+            age = (current_time - t) / point_lifetime
             
             if age >= 1.0:
                 continue
@@ -106,27 +114,9 @@ class GameView:
             alpha = int(255 * (1 - age))
             pulse = math.sin(self.pulse_time) * pulse_factor
             radius = int(base_radius + pulse)
-            color = self._normalize_color(base_color, alpha)
+            color = normalize_color(base_color, alpha)
             
-            self._draw_circle(x, y, radius, color)
-            
-    def _draw_circle(self, x, y, radius, color):
-        """Универсальный метод отрисовки круга"""
-        try:
-            gfxdraw.filled_circle(
-                self.screen, 
-                int(x), 
-                int(y), 
-                radius, 
-                color
-            )
-        except:
-            pygame.draw.circle(
-                self.screen, 
-                color[:3], 
-                (int(x), int(y)), 
-                radius
-            )
+            draw_circle(self.screen, x, y, radius, color)
             
     def _draw_particles(self, particles):
         """Отрисовка частиц"""
@@ -143,22 +133,22 @@ class GameView:
         
         points = [
             (
-                player.pos[0] + math.cos(angle) * player.radius * 1.5,
-                player.pos[1] + math.sin(angle) * player.radius * 1.5
+                player.pos[0] + math.cos(angle) * player.radius * Config.PLAYER_DIRECTION_SIZE,
+                player.pos[1] + math.sin(angle) * player.radius * Config.PLAYER_DIRECTION_SIZE
             ),
             (
-                player.pos[0] + math.cos(angle + 2.3) * player.radius * 0.8,
-                player.pos[1] + math.sin(angle + 2.3) * player.radius * 0.8
+                player.pos[0] + math.cos(angle + Config.PLAYER_WING_ANGLE) * player.radius * Config.PLAYER_WING_SIZE,
+                player.pos[1] + math.sin(angle + Config.PLAYER_WING_ANGLE) * player.radius * Config.PLAYER_WING_SIZE
             ),
             (
-                player.pos[0] + math.cos(angle - 2.3) * player.radius * 0.8,
-                player.pos[1] + math.sin(angle - 2.3) * player.radius * 0.8
+                player.pos[0] + math.cos(angle - Config.PLAYER_WING_ANGLE) * player.radius * Config.PLAYER_WING_SIZE,
+                player.pos[1] + math.sin(angle - Config.PLAYER_WING_ANGLE) * player.radius * Config.PLAYER_WING_SIZE
             )
         ]
         
-        alpha = 180 + int(player.glow * 7.5)
-        alpha = min(255, max(180, alpha))
-        color = self._normalize_color(base_color, alpha)
+        alpha = Config.PLAYER_GLOW_MIN + int(player.glow * Config.PLAYER_GLOW_FACTOR)
+        alpha = min(255, max(Config.PLAYER_GLOW_MIN, alpha))
+        color = normalize_color(base_color, alpha)
         
         try:
             gfxdraw.filled_polygon(self.screen, points, color)
@@ -179,14 +169,14 @@ class GameView:
                     
                     pygame.draw.rect(
                         self.screen, 
-                        self._normalize_color(base_color), 
+                        normalize_color(base_color), 
                         exit_rect
                     )
                     
-                    pulse = math.sin(self.pulse_time) * 3
+                    pulse = math.sin(self.pulse_time) * Config.EXIT_PULSE_SIZE
                     pygame.draw.rect(
                         self.screen, 
-                        self._normalize_color(base_color, 50), 
+                        normalize_color(base_color, Config.EXIT_GLOW_ALPHA), 
                         exit_rect.inflate(pulse * 2, pulse * 2)
                     )
                     
@@ -203,9 +193,9 @@ class GameView:
         """Отрисовка точек волны"""
         for point in wave['left_bound'] + wave['right_bound']:
             x, y, t = point
-            alpha = int(150 * (1 - (current_time - t) / wave['duration']))
-            color = self._normalize_color(base_color, alpha)
-            self._draw_circle(x, y, 1, color)
+            alpha = int(Config.DETECTOR_ALPHA * (1 - (current_time - t) / wave['duration']))
+            color = normalize_color(base_color, alpha)
+            draw_circle(self.screen, x, y, Config.DETECTOR_POINT_SIZE, color)
             
     def _draw_wave_lines(self, wave, base_color, current_time):
         """Отрисовка линий волны"""
@@ -213,14 +203,14 @@ class GameView:
             for i in range(len(bound) - 1):
                 x1, y1, t1 = bound[i]
                 x2, y2, t2 = bound[i+1]
-                alpha = int(80 * (1 - (current_time - t1) / wave['duration']))
-                color = self._normalize_color(base_color, alpha)
+                alpha = int(Config.DETECTOR_LINE_ALPHA * (1 - (current_time - t1) / wave['duration']))
+                color = normalize_color(base_color, alpha)
                 pygame.draw.line(
                     self.screen, 
                     color, 
                     (x1, y1), 
                     (x2, y2), 
-                    1
+                    Config.DETECTOR_LINE_WIDTH
                 )
                 
     def _draw_game_status(self, game_won, game_over, colors):
@@ -229,26 +219,20 @@ class GameView:
             text = self.font_large.render(
                 "ТЫ ПОБЕДИЛ!", 
                 True, 
-                self._normalize_color(colors['exit'])[:3]
+                normalize_color(colors['exit'])[:3]
             )
             self._draw_centered_text(text)
         elif game_over:
             text = self.font_large.render(
                 "ИГРА ОКОНЧЕНА", 
                 True, 
-                self._normalize_color(colors['danger'])[:3]
+                normalize_color(colors['danger'])[:3]
             )
             self._draw_centered_text(text)
             
     def _draw_centered_text(self, text_surface):
         """Отрисовка текста по центру экрана"""
-        self.screen.blit(
-            text_surface, 
-            (
-                Config.WIDTH // 2 - text_surface.get_width() // 2, 
-                Config.HEIGHT // 2 - text_surface.get_height() // 2
-            )
-        )
+        self.screen.blit(text_surface, center_text(self.screen, text_surface))
         
     def _draw_ui_buttons(self):
         """Отрисовка кнопок интерфейса"""

@@ -11,16 +11,16 @@ class MenuModel:
 
     def init_ui(self):
         center_x = Config.WIDTH // 2
-        button_width, button_height = 200, 50
+        button_width, button_height = Config.BUTTON_WIDTH, Config.BUTTON_HEIGHT
         
         # Кнопки главного меню
         self.main_menu_buttons = [
             Button(center_x - 100, 250, button_width, button_height, 
-                 "Начать игру", Config.GREEN, (50, 200, 50)),
+                 "Начать игру", Config.GREEN, Config.BUTTON_HOVER_GREEN),
             Button(center_x - 100, 320, button_width, button_height,
-                 "Настройки", Config.BLUE, (50, 50, 200)),
+                 "Настройки", Config.BLUE, Config.BUTTON_HOVER_BLUE),
             Button(center_x - 100, 390, button_width, button_height,
-                 "Выход", Config.RED, (200, 50, 50))
+                 "Выход", Config.RED, Config.BUTTON_HOVER_RED)
         ]
 
         # Слайдеры настроек
@@ -53,41 +53,33 @@ class MenuModel:
 
         # Кнопки настроек
         self.settings_buttons = [
-            Button(center_x - 100, 500, button_width, button_height,
-                 "Сохранить", Config.GREEN, (50, 200, 50)),
-            Button(center_x - 100, 570, button_width, button_height,
-                 "Назад", Config.RED, (200, 50, 50))
-        ]
-
-        # Кнопка сброса
-        self.settings_buttons = [
-        Button(center_x - 210, 500, 100, 50,
-              "Сброс", Config.GRAY, (150, 150, 150)),
-        Button(center_x - 100, 500, 200, 50,
-              "Сохранить", Config.GREEN, (50, 200, 50)),
-        Button(center_x - 100, 570, 200, 50,
-              "Назад", Config.RED, (200, 50, 50))
+            Button(center_x - 210, 500, 100, 50,
+                 "Сброс", Config.GRAY, Config.BUTTON_HOVER_GRAY),
+            Button(center_x - 100, 500, 200, 50,
+                 "Сохранить", Config.GREEN, Config.BUTTON_HOVER_GREEN),
+            Button(center_x - 100, 570, 200, 50,
+                 "Назад", Config.RED, Config.BUTTON_HOVER_RED)
         ]
 
     def save_settings(self):
         """Сохраняет текущие настройки в файл"""
         self.settings = {
-        'player_radius': int(self.settings_sliders[0].value),
-        'player_speed': float(self.settings_sliders[1].value),
-        'fog_radius': int(self.settings_sliders[2].value),
-        'point_lifetime': int(self.settings_sliders[3].value),
-        'locator_cooldown': int(self.settings_sliders[4].value),
-        'detector_cooldown': int(self.settings_sliders[5].value),
-        'colors': {
-            'background': self.color_pickers[0].color,
-            'player': self.color_pickers[1].color,
-            'walls': self.color_pickers[2].color,
-            'exit': self.color_pickers[3].color,
-            'danger': self.color_pickers[4].color,
-            'locator': self.color_pickers[5].color,
-            'detector': self.color_pickers[6].color
+            'player_radius': int(self.settings_sliders[0].value),
+            'player_speed': float(self.settings_sliders[1].value),
+            'fog_radius': int(self.settings_sliders[2].value),
+            'point_lifetime': int(self.settings_sliders[3].value),
+            'locator_cooldown': int(self.settings_sliders[4].value),
+            'detector_cooldown': int(self.settings_sliders[5].value),
+            'colors': {
+                'background': self.color_pickers[0].color,
+                'player': self.color_pickers[1].color,
+                'walls': self.color_pickers[2].color,
+                'exit': self.color_pickers[3].color,
+                'danger': self.color_pickers[4].color,
+                'locator': self.color_pickers[5].color,
+                'detector': self.color_pickers[6].color
+            }
         }
-}
         Config.save_settings(self.settings)
     
     def reset_to_default(self):
@@ -98,30 +90,30 @@ class MenuModel:
         self.settings = default.copy()
         
         # Сбрасываем слайдеры
-        for i, slider in enumerate(self.settings_sliders):
-            key = [
-                'player_radius',
-                'player_speed',
-                'fog_radius',
-                'point_lifetime',
-                'locator_cooldown',
-                'detector_cooldown'
-            ][i]
-            slider.value = default[key]
-            slider.update_knob()
+        slider_keys = [
+            'player_radius',
+            'player_speed',
+            'fog_radius',
+            'point_lifetime',
+            'locator_cooldown',
+            'detector_cooldown'
+        ]
+        for i, key in enumerate(slider_keys):
+            self.settings_sliders[i].value = default[key]
+            self.settings_sliders[i].update_knob()
         
         # Сбрасываем цветовые пикеры
-        for i, picker in enumerate(self.color_pickers):
-            color_key = [
-                'background',
-                'player',
-                'walls',
-                'exit',
-                'danger',
-                'locator',
-                'detector'
-            ][i]
-            picker.color = list(default['colors'][color_key])
+        color_keys = [
+            'background',
+            'player',
+            'walls',
+            'exit',
+            'danger',
+            'locator',
+            'detector'
+        ]
+        for i, key in enumerate(color_keys):
+            self.color_pickers[i].color = list(default['colors'][key])
         
         # Обновляем слайдеры цветов, если активен пикер
         if self.active_color_picker:

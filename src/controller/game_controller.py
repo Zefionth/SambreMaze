@@ -103,26 +103,23 @@ class GameController:
         self.settings = settings
         
         # Основные настройки
-        self.model.player.radius = settings['player_radius']
-        self.model.player.speed = settings['player_speed']
+        self.model.player.radius = settings.get('player_radius', 10)
+        self.model.player.speed = settings.get('player_speed', 3.5)
         self.model.player.speed_diagonal = self.model.player.speed * 0.7071
         self.model.player.color = settings['colors']['player']
         
-        # Обновляем все параметры в модели игры
-        self.model.settings = settings.copy()
-        
-        # Если игра активна, применяем настройки к текущей сессии
-        if not self.model.game_over and not self.model.game_won:
-            self.model.player.radius = settings['player_radius']
-            self.model.player.speed = settings['player_speed']
-            self.model.player.speed_diagonal = self.model.player.speed * 0.7071
-            self.model.player.color = settings['colors']['player']
+        # Параметры игры
+        self.fog_radius = settings.get('fog_radius', 150)
+        self.point_lifetime = settings.get('point_lifetime', 2500)
+        self.locator_cooldown = settings.get('locator_cooldown', 25)
+        self.detector_cooldown = settings.get('detector_cooldown', 500)
+        self.colors = settings['colors']
         
     def check_ui_buttons(self, mouse_pos):
         """Проверяет нажатия на кнопки интерфейса"""
-        if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Рестарт
+        if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Restart
             self.start_game()
-        elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Меню
+        elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Menu
             self.return_to_menu = True
 
     def update(self, dt: float):
@@ -148,6 +145,7 @@ class GameController:
             'fog_radius': self.settings['fog_radius'],
             'cell_size': self.model.cell_size,
             'show_path': self.model.show_path,
-            'path': self.model.path
+            'path': self.model.path,
+            'point_lifetime': self.settings['point_lifetime']
         }
         self.view.draw(game_state)

@@ -68,8 +68,7 @@ class MenuController:
                     button.check_hover(mouse_pos)
                     if button.is_clicked(mouse_pos, mouse_click):
                         if button.text == "Сброс":
-                            self.model.reset_to_default()  # Полный сброс
-                            continue
+                            self.model.reset_to_default()
                         elif button.text == "Сохранить":
                             self.model.save_settings()
                         elif button.text == "Назад":
@@ -78,10 +77,8 @@ class MenuController:
         return True
 
     def update(self, dt: float):
-        """Обновляет состояние меню"""
-        pass  # В текущей реализации не требуется
-
-    
+        """Обновляет состояние меню (заглушка)"""
+        pass
 
     def draw(self):
         """Отрисовывает меню"""

@@ -1,21 +1,72 @@
-"""Конфигурация игры и управление настройками.
-
-Содержит настройки по умолчанию, методы для загрузки/сохранения настроек,
-а также основные константы, используемые в игре (размеры экрана, цвета и т.д.).
-"""
+"""Конфигурация игры и управление настройками"""
 import json
+import pygame
 
 class Config:
-    """Основной класс для хранения конфигурации игры.
-    
-    Атрибуты:
-        WIDTH (int): Ширина игрового окна в пикселях
-        HEIGHT (int): Высота игрового окна в пикселях
-        DEFAULT_SETTINGS (dict): Настройки по умолчанию
-    """
+    """Основной класс для хранения конфигурации игры"""
     
     # Размеры экрана
     WIDTH, HEIGHT = 1000, 800
+    
+    # Размеры игровых элементов
+    CELL_SIZE = 30
+    START_ZONE_SIZE = 1
+    DANGER_ZONE_RATIO = 0.3
+    
+    # Игровые константы
+    DIAGONAL_FACTOR = 0.7071  # 1/sqrt(2)
+    MAX_GLOW = 10
+    GLOW_INCREASE = 1
+    GLOW_DECAY_RATE = 5
+    PULSE_SPEED = 0.1
+    
+    # Настройки частиц
+    PARTICLE_SIZE = 2
+    PARTICLE_LIFETIME = 0.4
+    PARTICLE_SPEED = 0.2
+    PARTICLE_SPEED_FACTOR = 60
+    GAMEOVER_PARTICLE_SIZE = 15
+    GAMEOVER_PARTICLE_LIFETIME = 2.0
+    
+    # Настройки локатора
+    LOCATOR_SCAN_LENGTH = 200
+    LOCATOR_SCAN_STEP = 1
+    LOCATOR_ANGLE_VARIATION = 0.02
+    LOCATOR_HIT_VARIATION = 2
+    
+    # Настройки детектора
+    DETECTOR_SCAN_LENGTH = 200
+    DETECTOR_SCAN_STEP = 3
+    DETECTOR_ANGLE_MIN = -45
+    DETECTOR_ANGLE_MAX = 46
+    DETECTOR_ANGLE_STEP = 2
+    
+    # Настройки отображения
+    PATH_LINE_WIDTH = 3
+    FOG_ALPHA = 200
+    LOCATOR_PULSE_FACTOR = 1.5
+    LOCATOR_BASE_RADIUS = 3
+    DETECTOR_PULSE_FACTOR = 2.0
+    DETECTOR_BASE_RADIUS = 1
+    EXIT_PULSE_SIZE = 3
+    EXIT_GLOW_ALPHA = 50
+    DETECTOR_POINT_SIZE = 1
+    DETECTOR_ALPHA = 150
+    DETECTOR_LINE_ALPHA = 80
+    DETECTOR_LINE_WIDTH = 1
+    PLAYER_DIRECTION_SIZE = 1.5
+    PLAYER_WING_ANGLE = 2.3
+    PLAYER_WING_SIZE = 0.8
+    PLAYER_GLOW_MIN = 180
+    PLAYER_GLOW_FACTOR = 7.5
+    
+    # Настройки UI
+    UI_FONT_SIZE = 24
+    UI_BORDER_WIDTH = 2
+    BUTTON_WIDTH = 200
+    BUTTON_HEIGHT = 50
+    SLIDER_KNOB_WIDTH = 20
+    SLIDER_TEXT_OFFSET = 25
     
     # Цвета
     BLACK = (0, 0, 0)
@@ -26,6 +77,12 @@ class Config:
     BLUE = (100, 100, 255)
     GRAY = (100, 100, 100)
     LIGHT_GRAY = (200, 200, 200)
+    
+    # Цвета кнопок при наведении
+    BUTTON_HOVER_GREEN = (50, 200, 50)
+    BUTTON_HOVER_BLUE = (50, 50, 200)
+    BUTTON_HOVER_RED = (200, 50, 50)
+    BUTTON_HOVER_GRAY = (150, 150, 150)
     
     # Настройки по умолчанию
     DEFAULT_SETTINGS = {
@@ -45,16 +102,14 @@ class Config:
             'detector': RED
         }
     }
+    
+    # Значения по умолчанию для игрока
+    PLAYER_DEFAULT_RADIUS = 10
+    PLAYER_DEFAULT_SPEED = 3.5
         
     @classmethod
     def load_settings(cls) -> dict:
-        """Загружает настройки из JSON файла.
-        
-        Если файл не найден или поврежден, возвращает настройки по умолчанию.
-        
-        Returns:
-            dict: Загруженные настройки или DEFAULT_SETTINGS
-        """
+        """Загружает настройки из JSON файла"""
         try:
             with open('settings.json', 'r') as f:
                 return json.load(f)
@@ -63,10 +118,6 @@ class Config:
     
     @classmethod
     def save_settings(cls, settings: dict) -> None:
-        """Сохраняет текущие настройки в JSON файл.
-        
-        Args:
-            settings (dict): Словарь с настройками для сохранения
-        """
+        """Сохраняет текущие настройки в JSON файл"""
         with open('settings.json', 'w') as f:
             json.dump(settings, f, indent=4)

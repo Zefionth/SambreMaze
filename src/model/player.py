@@ -1,17 +1,19 @@
-"""Модель игрока с улучшенной системой коллизий"""
+"""Модель игрока"""
 from src.config import Config
+from src.utils import is_valid_cell
 
 class Player:
     def __init__(self, settings: dict):
         self.pos = [Config.WIDTH // 2, Config.HEIGHT // 2]
-        self.radius = settings.get('player_radius', 10)
-        self.speed = settings.get('player_speed', 3.5)
-        self.speed_diagonal = self.speed * 0.7071  # 1/sqrt(2)
+        self.radius = settings.get('player_radius', Config.PLAYER_DEFAULT_RADIUS)
+        self.speed = settings.get('player_speed', Config.PLAYER_DEFAULT_SPEED)
+        self.speed_diagonal = self.speed * Config.DIAGONAL_FACTOR
         self.glow = 0
         self.color = settings['colors']['player']
         self.last_valid_pos = self.pos.copy()
     
     def update_position(self, dx: float, dy: float, game_state: dict) -> None:
+        """Обновляет позицию игрока с учетом коллизий"""
         if game_state['game_over'] or game_state['game_won']:
             return
         
@@ -46,7 +48,7 @@ class Player:
         # Проверяем углы игрока
         for x, y in self._get_corners(pos):
             cell_x, cell_y = int(x) // cell_size, int(y) // cell_size
-            if self._is_wall_collision(cell_x, cell_y, thin_walls):
+            if is_valid_cell(cell_x, cell_y, thin_walls) and thin_walls[cell_y][cell_x] == 1:
                 return True
         return False
     
@@ -58,12 +60,6 @@ class Player:
             (pos[0] - self.radius, pos[1] + self.radius),  # Левый нижний
             (pos[0] + self.radius, pos[1] - self.radius)   # Правый верхний
         ]
-    
-    def _is_wall_collision(self, cell_x: int, cell_y: int, thin_walls: list) -> bool:
-        """Проверяет, является ли клетка стеной"""
-        return (0 <= cell_x < len(thin_walls[0]) and \
-               (0 <= cell_y < len(thin_walls)) and \
-               thin_walls[cell_y][cell_x] == 1)
     
     def _try_slide_movement(self, dx: float, dy: float, game_state: dict):
         """Пытается выполнить скольжение вдоль стены"""
@@ -82,4 +78,4 @@ class Player:
     
     def update_glow(self, dt: float) -> None:
         """Обновляет свечение игрока"""
-        self.glow = max(0, self.glow - dt * 5)
+        self.glow = max(0, self.glow - dt * Config.GLOW_DECAY_RATE)

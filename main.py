@@ -2,6 +2,7 @@
 import pygame
 from src.controller.game_controller import GameController
 from src.controller.menu_controller import MenuController
+from src.config import Config
 
 class Main:
     def __init__(self):
@@ -42,6 +43,5 @@ class Main:
         pygame.quit()
 
 if __name__ == "__main__":
-    from src.config import Config
     game = Main()
     game.run()
