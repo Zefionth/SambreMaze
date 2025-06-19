@@ -7,7 +7,7 @@
 import pygame
 import math
 from pygame import mixer
-from typing import Dict, Tuple, List, Any
+from typing import Dict, Tuple, Any
 from src.model.game_model import GameModel
 from src.model.particle import Particle
 from src.view.game_view import GameView
