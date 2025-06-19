@@ -13,8 +13,9 @@ class GameView:
         
     def _init_fonts(self):
         """Инициализация шрифтов"""
-        self.font = pygame.font.SysFont(Config.FONT_NAME, 24)
-        self.font_large = pygame.font.SysFont(Config.FONT_NAME, 48)
+        # Используем константы из Config вместо "магических чисел"
+        self.font = pygame.font.SysFont(Config.FONT_NAME, Config.UI_FONT_SIZE)
+        self.font_large = pygame.font.SysFont(Config.FONT_NAME, Config.SETTINGS_FONT_SIZE)
         
     def _init_surfaces(self):
         """Инициализация поверхностей для эффектов"""
@@ -68,7 +69,8 @@ class GameView:
             
     def _draw_ui(self, game_state):
         """Отрисовка интерфейса пользователя"""
-        self._draw_game_status(game_state['game_won'], game_state['game_over'], game_state['colors'])
+        # Убрали неиспользуемый параметр colors
+        self._draw_game_status(game_state['game_won'], game_state['game_over'])
         self._draw_ui_buttons()
         
     def _create_fog(self, player_pos, fog_radius):
@@ -135,6 +137,7 @@ class GameView:
             mouse_pos[0] - player.pos[0]
         )
         
+        # Исправлен расчет позиции игрока
         points = [
             (
                 player.pos[0] + math.cos(angle) * player.radius * Config.PLAYER_DIRECTION_SIZE,
@@ -206,7 +209,7 @@ class GameView:
         for bound in [wave['left_bound'], wave['right_bound']]:
             for i in range(len(bound) - 1):
                 x1, y1, t1 = bound[i]
-                x2, y2, t2 = bound[i+1]
+                x2, y2, _ = bound[i+1]
                 alpha = int(Config.DETECTOR_LINE_ALPHA * (1 - (current_time - t1) / wave['duration']))
                 color = normalize_color(base_color, alpha)
                 pygame.draw.line(
@@ -217,8 +220,9 @@ class GameView:
                     Config.DETECTOR_LINE_WIDTH
                 )
                 
-    def _draw_game_status(self, game_won, game_over, colors):
+    def _draw_game_status(self, game_won, game_over):
         """Отрисовка статуса игры (победа/поражение)"""
+        # Убрали неиспользуемый параметр colors
         if game_won:
             text = self.font_large.render(
                 "ТЫ ПОБЕДИЛ!", 

@@ -2,9 +2,9 @@
 import pygame
 import math
 from src.model.game_model import GameModel
+from src.model.particle import Particle
 from src.view.game_view import GameView
 from src.config import Config
-from src.model.particle import Particle
 
 class GameController:
     def __init__(self, screen, sounds):
@@ -17,7 +17,7 @@ class GameController:
         self.game_won_sound_played = False
         self.game_over_sound_played = False
         self.locator_sound_playing = False
-        self.detector_cooldown_active = False
+        self.last_detector_time = 0  # Восстановим таймер для детектора
 
     def start_game(self):
         """Начинает новую игру"""
@@ -26,7 +26,7 @@ class GameController:
         self.game_won_sound_played = False
         self.game_over_sound_played = False
         self.locator_sound_playing = False
-        self.detector_cooldown_active = False
+        self.last_detector_time = 0  # Сброс таймера детектора
 
     def handle_events(self) -> bool:
         """Обрабатывает игровые события"""
@@ -50,19 +50,18 @@ class GameController:
             if self._is_ui_button_clicked(mouse_pos):
                 return
             else:
-                self._handle_locator_activation()
+                if not self.model.game_won and not self.model.game_over:
+                    self._handle_locator_activation()
                 
         elif event.button == 3:  # ПКМ - детектор
-            self._handle_detector_activation(mouse_pos)
+            if not self.model.game_won and not self.model.game_over:
+                self._handle_detector_activation(mouse_pos)
 
     def _handle_mouse_button_up(self, event):
         """Обрабатывает отпускание кнопки мыши"""
         if event.button == 1:  # ЛКМ
             self.model.left_mouse_down = False
             self._stop_locator_sound()
-            
-        elif event.button == 3:  # ПКМ
-            self.detector_cooldown_active = False
 
     def _is_ui_button_clicked(self, mouse_pos) -> bool:
         """Проверяет клик по UI-кнопкам"""
@@ -98,22 +97,23 @@ class GameController:
     def _handle_detector_activation(self, mouse_pos):
         """Активирует детектор при нажатии ПКМ"""
         current_time = pygame.time.get_ticks()
-        if not self.detector_cooldown_active and current_time - self.model.last_detector_time > self.settings['detector_cooldown']:
+        detector_cooldown = self.settings['detector_cooldown']
+        
+        # Проверяем перезарядку
+        if current_time - self.last_detector_time >= detector_cooldown:
             self.sounds['detector'].play()
             self._perform_detector_scan(current_time, mouse_pos)
-            self.detector_cooldown_active = True
+            self.last_detector_time = current_time
 
     def _perform_detector_scan(self, current_time, mouse_pos):
         """Выполняет сканирование детектором"""
-        self.model.last_detector_time = current_time
         angle = math.atan2(
             mouse_pos[1]-self.model.player.pos[1], 
             mouse_pos[0]-self.model.player.pos[0]
         )
         
-        # Создаем волну сканирования
-        wave_points, hit_positions = self.model.add_detector_wave(
-            self.model.player.pos, angle)
+        # Делегируем сканирование модели
+        wave_points, hit_positions = self.model.add_detector_wave(self.model.player.pos, angle)
         
         # Границы конуса сканирования
         left_bound, right_bound = [], []
@@ -175,13 +175,19 @@ class GameController:
         """Обновляет игровое состояние"""
         mouse_pos = pygame.mouse.get_pos()
         keys_pressed = pygame.key.get_pressed()
-        self.model.update(dt, mouse_pos, keys_pressed)
+        
+        if not self.model.game_won and not self.model.game_over:
+            self.model.update(dt, mouse_pos, keys_pressed)
         
         self._handle_locator_sound()
         self._play_game_status_sounds()
 
     def _handle_locator_sound(self):
         """Управляет звуком локатора"""
+        if self.model.game_won or self.model.game_over:
+            self._stop_locator_sound()
+            return
+            
         if self.model.left_mouse_down:
             if not pygame.mixer.get_busy() or pygame.mixer.Sound.get_num_channels(self.sounds['locator']) == 0:
                 self.sounds['locator'].play(loops=-1)
@@ -193,6 +199,7 @@ class GameController:
         if self.locator_sound_playing:
             self.sounds['locator'].stop()
             self.locator_sound_playing = False
+            self.model.left_mouse_down = False
 
     def _play_game_status_sounds(self):
         """Воспроизводит звуки победы/поражения"""

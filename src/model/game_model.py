@@ -2,12 +2,12 @@
 from src.model.player import Player
 from src.model.maze import MazeGenerator
 from src.model.particle import Particle
+from src.model.scanner import LocatorScanner, DetectorScanner
 from src.utils import is_valid_cell
 from src.config import Config
 from typing import List, Tuple, Dict
 import pygame
 import math
-import random
 import heapq
 
 class GameModel:
@@ -32,12 +32,13 @@ class GameModel:
         self.game_won = False
         self.game_over = False
         
-        self.last_locator_time = 0
-        self.last_detector_time = 0
         self.left_mouse_down = False
-        
         self.show_path = False
         self.path = []
+        
+        # Создаем сканеры
+        self.locator_scanner = LocatorScanner(self)
+        self.detector_scanner = DetectorScanner(self)
     
     def update(self, dt: float, mouse_pos: Tuple[int, int], keys_pressed: List[bool]):
         """Обновляет игровое состояние."""
@@ -50,10 +51,10 @@ class GameModel:
 
     def _handle_locator_scan(self, current_time: int, mouse_pos: Tuple[int, int]):
         """Обрабатывает сканирование локатором."""
-        if self.left_mouse_down and current_time - self.last_locator_time > self.settings['locator_cooldown']:
-            self.last_locator_time = current_time
+        if self.left_mouse_down:
+            # Используем сканер локатора
             angle = math.atan2(mouse_pos[1]-self.player.pos[1], mouse_pos[0]-self.player.pos[0])
-            new_points = self.precise_locator_scan(self.player.pos, angle)
+            new_points = self.locator_scanner.scan(self.player.pos, angle)
             
             if new_points:
                 self.locator_points.extend(new_points)
@@ -114,34 +115,6 @@ class GameModel:
         self.detector_points = [(x,y,t) for x,y,t in self.detector_points 
                             if current_time - t < self.settings['point_lifetime']]
 
-    def precise_locator_scan(self, start_pos: List[float], angle: float) -> List[Tuple[float, float, int]]:
-        """Выполняет точное сканирование локатором в заданном направлении."""
-        length = Config.LOCATOR_SCAN_LENGTH
-        angle += random.uniform(-Config.LOCATOR_ANGLE_VARIATION, Config.LOCATOR_ANGLE_VARIATION)
-        
-        closest_hit = None
-        closest_dist = float('inf')
-        
-        for dist in range(5, length, Config.LOCATOR_SCAN_STEP):
-            x = start_pos[0] + math.cos(angle) * dist
-            y = start_pos[1] + math.sin(angle) * dist
-            
-            cell_x, cell_y = int(x)//self.cell_size, int(y)//self.cell_size
-            if is_valid_cell(cell_x, cell_y, self.thin_walls):
-                if self.thin_walls[cell_y][cell_x] == 1 or self.maze[cell_y][cell_x] == 2:
-                    if dist < closest_dist:
-                        closest_dist = dist
-                        closest_hit = (x, y, cell_x, cell_y)
-                    break
-        
-        if closest_hit:
-            x, y, cell_x, cell_y = closest_hit
-            normal = self.get_wall_normal(cell_x, cell_y, x, y)
-            return [(x + normal[0] * random.uniform(-Config.LOCATOR_HIT_VARIATION, Config.LOCATOR_HIT_VARIATION),
-                    y + normal[1] * random.uniform(-Config.LOCATOR_HIT_VARIATION, Config.LOCATOR_HIT_VARIATION),
-                    pygame.time.get_ticks())]
-        return []
-    
     def get_wall_normal(self, cell_x: int, cell_y: int, hit_x: float, hit_y: float) -> Tuple[int, int]:
         """Определяет нормаль стены в точке столкновения."""
         cell_left = cell_x * self.cell_size
@@ -164,22 +137,7 @@ class GameModel:
     
     def add_detector_wave(self, start_pos: List[float], angle: float) -> Tuple[List, List]:
         """Создает волну детектора в заданном направлении."""
-        wave_points = []
-        hit_positions = []
-        
-        for delta in range(Config.DETECTOR_ANGLE_MIN, Config.DETECTOR_ANGLE_MAX, Config.DETECTOR_ANGLE_STEP):
-            current_angle = angle + math.radians(delta)
-            for dist in range(0, Config.DETECTOR_SCAN_LENGTH, Config.DETECTOR_SCAN_STEP):
-                x = start_pos[0] + math.cos(current_angle) * dist
-                y = start_pos[1] + math.sin(current_angle) * dist
-                wave_points.append((x, y, pygame.time.get_ticks()))
-                
-                cell_x, cell_y = int(x)//self.cell_size, int(y)//self.cell_size
-                if is_valid_cell(cell_x, cell_y, self.maze):
-                    if (cell_x, cell_y) in self.danger_zones:
-                        hit_positions.append((x, y))
-                        break
-        return wave_points, hit_positions
+        return self.detector_scanner.scan(start_pos, angle)
 
     def find_path_to_exit(self):
         """Находит путь к выходу из лабиринта с использованием алгоритма A*."""
