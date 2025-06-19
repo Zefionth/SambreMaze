@@ -2,9 +2,9 @@
 import pygame
 import math
 from src.model.game_model import GameModel
-from src.model.particle import Particle
 from src.view.game_view import GameView
 from src.config import Config
+from src.model.particle import Particle
 
 class GameController:
     def __init__(self, screen, sounds):
@@ -14,7 +14,6 @@ class GameController:
         self.model = GameModel(self.settings)
         self.view = GameView(screen)
         self.return_to_menu = False
-        self.show_path = False
         self.game_won_sound_played = False
         self.game_over_sound_played = False
         self.locator_sound_playing = False
@@ -31,103 +30,130 @@ class GameController:
 
     def handle_events(self) -> bool:
         """Обрабатывает игровые события"""
-        current_time = pygame.time.get_ticks()
-        mouse_pos = pygame.mouse.get_pos()
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # ЛКМ
-                    # Проверка кнопок интерфейса
-                    if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Restart
-                        self.sounds['click'].play()
-                        self.start_game()
-                    elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Menu
-                        self.sounds['click'].play()
-                        self.sounds['locator'].stop()
-                        self.locator_sound_playing = False
-                        self.return_to_menu = True
-                    elif 230 <= mouse_pos[0] <= 330 and 10 <= mouse_pos[1] <= 40:  # Show Path
-                        self.sounds['click'].play()
-                        self.model.show_path = not self.model.show_path
-                        if self.model.show_path:
-                            self.model.find_path_to_exit()
-                        else:
-                            self.model.path = []
-                    else:
-                        self.model.left_mouse_down = True
-                        if not self.locator_sound_playing:
-                            self.sounds['locator'].play(loops=-1)
-                            self.locator_sound_playing = True
-                elif event.button == 3:  # ПКМ - детектор
-                    if not self.detector_cooldown_active and current_time - self.model.last_detector_time > self.settings['detector_cooldown']:
-                        self.sounds['detector'].play()
-                        self.handle_detector_scan(current_time, mouse_pos)
-                        self.detector_cooldown_active = True
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self._handle_mouse_button_down(event)
+            
             elif event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1:
-                    self.model.left_mouse_down = False
-                    if self.locator_sound_playing:
-                        self.sounds['locator'].stop()
-                        self.locator_sound_playing = False
-                elif event.button == 3:
-                    self.detector_cooldown_active = False
-
+                self._handle_mouse_button_up(event)
+                
         return True
 
-    def handle_detector_scan(self, current_time, mouse_pos):
-        """Обрабатывает активацию детектора"""
-        if current_time - self.model.last_detector_time > self.settings['detector_cooldown']:
-            self.model.last_detector_time = current_time
-            angle = math.atan2(
-                mouse_pos[1]-self.model.player.pos[1], 
-                mouse_pos[0]-self.model.player.pos[0]
-            )
-            
-            # Создаем волну сканирования
-            wave_points, hit_positions = self.model.add_detector_wave(
-                self.model.player.pos, angle)
-            
-            # Границы конуса сканирования
-            left_bound, right_bound = [], []
-            for dist in range(0, self.settings['fog_radius'], Config.DETECTOR_SCAN_STEP):
-                angle_left = angle - math.radians(Config.DETECTOR_ANGLE_MIN)
-                angle_right = angle + math.radians(Config.DETECTOR_ANGLE_MIN)
+    def _handle_mouse_button_down(self, event):
+        """Обрабатывает нажатие кнопки мыши"""
+        mouse_pos = pygame.mouse.get_pos()
+        
+        if event.button == 1:  # ЛКМ
+            if self._is_ui_button_clicked(mouse_pos):
+                return
+            else:
+                self._handle_locator_activation()
                 
-                left_bound.append((
-                    self.model.player.pos[0] + math.cos(angle_left) * dist,
-                    self.model.player.pos[1] + math.sin(angle_left) * dist,
-                    current_time
-                ))
-                
-                right_bound.append((
-                    self.model.player.pos[0] + math.cos(angle_right) * dist,
-                    self.model.player.pos[1] + math.sin(angle_right) * dist,
-                    current_time
-                ))
+        elif event.button == 3:  # ПКМ - детектор
+            self._handle_detector_activation(mouse_pos)
 
-            # Добавляем скан в модель
-            self.model.detector_lines.append({
-                'points': wave_points,
-                'left_bound': left_bound,
-                'right_bound': right_bound,
-                'start_time': current_time,
-                'duration': Config.DETECTOR_WAVE_DURATION,
-                'hit_positions': hit_positions,
-                'hit_revealed': [False]*len(hit_positions)
-            })
+    def _handle_mouse_button_up(self, event):
+        """Обрабатывает отпускание кнопки мыши"""
+        if event.button == 1:  # ЛКМ
+            self.model.left_mouse_down = False
+            self._stop_locator_sound()
+            
+        elif event.button == 3:  # ПКМ
+            self.detector_cooldown_active = False
 
-            # Добавляем эффекты для обнаруженных опасных зон
-            for pos in hit_positions:
-                self.model.detector_points.append((*pos, current_time))
-                self.model.particles.append(Particle(
-                    pos[0], pos[1], 
-                    self.settings['colors']['detector'],
-                    Config.PARTICLE_SIZE, 
-                    Config.PARTICLE_LIFETIME
-                ))
+    def _is_ui_button_clicked(self, mouse_pos) -> bool:
+        """Проверяет клик по UI-кнопкам"""
+        if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Restart
+            self.sounds['click'].play()
+            self.start_game()
+            return True
+            
+        elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Menu
+            self.sounds['click'].play()
+            self._stop_locator_sound()
+            self.return_to_menu = True
+            return True
+            
+        elif 230 <= mouse_pos[0] <= 330 and 10 <= mouse_pos[1] <= 40:  # Show Path
+            self.sounds['click'].play()
+            self.model.show_path = not self.model.show_path
+            if self.model.show_path:
+                self.model.find_path_to_exit()
+            else:
+                self.model.path = []
+            return True
                 
+        return False
+
+    def _handle_locator_activation(self):
+        """Активирует локатор при нажатии ЛКМ"""
+        self.model.left_mouse_down = True
+        if not self.locator_sound_playing:
+            self.sounds['locator'].play(loops=-1)
+            self.locator_sound_playing = True
+
+    def _handle_detector_activation(self, mouse_pos):
+        """Активирует детектор при нажатии ПКМ"""
+        current_time = pygame.time.get_ticks()
+        if not self.detector_cooldown_active and current_time - self.model.last_detector_time > self.settings['detector_cooldown']:
+            self.sounds['detector'].play()
+            self._perform_detector_scan(current_time, mouse_pos)
+            self.detector_cooldown_active = True
+
+    def _perform_detector_scan(self, current_time, mouse_pos):
+        """Выполняет сканирование детектором"""
+        self.model.last_detector_time = current_time
+        angle = math.atan2(
+            mouse_pos[1]-self.model.player.pos[1], 
+            mouse_pos[0]-self.model.player.pos[0]
+        )
+        
+        # Создаем волну сканирования
+        wave_points, hit_positions = self.model.add_detector_wave(
+            self.model.player.pos, angle)
+        
+        # Границы конуса сканирования
+        left_bound, right_bound = [], []
+        for dist in range(0, self.settings['fog_radius'], Config.DETECTOR_SCAN_STEP):
+            angle_left = angle - math.radians(Config.DETECTOR_ANGLE_MIN)
+            angle_right = angle + math.radians(Config.DETECTOR_ANGLE_MIN)
+            
+            left_bound.append((
+                self.model.player.pos[0] + math.cos(angle_left) * dist,
+                self.model.player.pos[1] + math.sin(angle_left) * dist,
+                current_time
+            ))
+            
+            right_bound.append((
+                self.model.player.pos[0] + math.cos(angle_right) * dist,
+                self.model.player.pos[1] + math.sin(angle_right) * dist,
+                current_time
+            ))
+
+        # Добавляем скан в модель
+        self.model.detector_lines.append({
+            'points': wave_points,
+            'left_bound': left_bound,
+            'right_bound': right_bound,
+            'start_time': current_time,
+            'duration': Config.DETECTOR_WAVE_DURATION,
+            'hit_positions': hit_positions,
+            'hit_revealed': [False]*len(hit_positions)
+        })
+
+        # Добавляем эффекты для обнаруженных опасных зон
+        for pos in hit_positions:
+            self.model.detector_points.append((*pos, current_time))
+            self.model.particles.append(Particle(
+                pos[0], pos[1], 
+                self.settings['colors']['detector'],
+                Config.PARTICLE_SIZE, 
+                Config.PARTICLE_LIFETIME
+            ))
+
     def apply_settings(self, settings):
         """Применяет настройки с обновлением слайдеров"""
         self.settings = settings
@@ -144,16 +170,6 @@ class GameController:
         self.locator_cooldown = settings.get('locator_cooldown', 25)
         self.detector_cooldown = settings.get('detector_cooldown', 500)
         self.colors = settings['colors']
-        
-    def check_ui_buttons(self, mouse_pos):
-        """Проверяет нажатия на кнопки интерфейса"""
-        if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:  # Restart
-            self.sounds['click'].play()
-            self.start_game()
-        elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Menu
-            self.sounds['click'].play()
-            self.sounds['locator'].stop()
-            self.return_to_menu = True
 
     def update(self, dt: float):
         """Обновляет игровое состояние"""
@@ -161,21 +177,34 @@ class GameController:
         keys_pressed = pygame.key.get_pressed()
         self.model.update(dt, mouse_pos, keys_pressed)
         
-        # Постоянный звук локатора при зажатой ЛКМ
+        self._handle_locator_sound()
+        self._play_game_status_sounds()
+
+    def _handle_locator_sound(self):
+        """Управляет звуком локатора"""
         if self.model.left_mouse_down:
             if not pygame.mixer.get_busy() or pygame.mixer.Sound.get_num_channels(self.sounds['locator']) == 0:
                 self.sounds['locator'].play(loops=-1)
-        
-        # Воспроизведение звуков победы/поражения
+        elif self.locator_sound_playing:
+            self._stop_locator_sound()
+
+    def _stop_locator_sound(self):
+        """Останавливает звук локатора"""
+        if self.locator_sound_playing:
+            self.sounds['locator'].stop()
+            self.locator_sound_playing = False
+
+    def _play_game_status_sounds(self):
+        """Воспроизводит звуки победы/поражения"""
         if self.model.game_won and not self.game_won_sound_played:
             self.sounds['win'].play()
             self.game_won_sound_played = True
-            self.sounds['locator'].stop()
+            self._stop_locator_sound()
         
         if self.model.game_over and not self.game_over_sound_played:
             self.sounds['lose'].play()
             self.game_over_sound_played = True
-            self.sounds['locator'].stop()
+            self._stop_locator_sound()
 
     def draw(self):
         """Отрисовывает игровое состояние"""
