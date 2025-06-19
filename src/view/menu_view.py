@@ -13,7 +13,11 @@ class MenuView:
     def draw(self, current_menu, main_buttons, settings_sliders, 
             color_pickers, settings_buttons, active_picker, color_sliders, colors):
         """Отрисовывает текущее состояние меню"""
-        self.screen.fill(colors['background'] if current_menu == "main" else (240, 240, 230))
+        # Используем фиксированные цвета для фона
+        if current_menu == "main":
+            self.screen.fill(Config.DARK)  # Фиксированный темный фон для главного меню
+        else:
+            self.screen.fill((240, 240, 230))  # Светлый фон для меню настроек
 
         if current_menu == "main":
             # Заголовок главного меню

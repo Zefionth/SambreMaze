@@ -5,8 +5,8 @@ from src.utils import is_valid_cell
 class Player:
     def __init__(self, settings: dict):
         self.pos = [Config.WIDTH // 2, Config.HEIGHT // 2]
-        self.radius = settings.get('player_radius', Config.PLAYER_DEFAULT_RADIUS)
-        self.speed = settings.get('player_speed', Config.PLAYER_DEFAULT_SPEED)
+        self.radius = settings.get('player_radius', Config.DEFAULT_SETTINGS['player_radius'])
+        self.speed = settings.get('player_speed', Config.DEFAULT_SETTINGS['player_speed'])
         self.speed_diagonal = self.speed * Config.DIAGONAL_FACTOR
         self.glow = 0
         self.color = settings['colors']['player']

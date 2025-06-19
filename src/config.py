@@ -40,6 +40,7 @@ class Config:
     DETECTOR_ANGLE_MIN = -45
     DETECTOR_ANGLE_MAX = 46
     DETECTOR_ANGLE_STEP = 2
+    DETECTOR_WAVE_DURATION = 500
     
     # Настройки отображения
     PATH_LINE_WIDTH = 3
@@ -83,6 +84,15 @@ class Config:
     BUTTON_HOVER_BLUE = (50, 50, 200)
     BUTTON_HOVER_RED = (200, 50, 50)
     BUTTON_HOVER_GRAY = (150, 150, 150)
+
+    # Громкость звуков
+    SOUND_VOLUMES = {
+        'click': 0.7,
+        'locator': 0.5,
+        'detector': 0.6,
+        'win': 0.8,
+        'lose': 0.8
+    }
     
     # Настройки по умолчанию
     DEFAULT_SETTINGS = {
@@ -93,20 +103,13 @@ class Config:
         'locator_cooldown': 25,
         'detector_cooldown': 500,
         'colors': {
-            'background': DARK,
             'player': WHITE,
-            'walls': WHITE,
             'exit': GREEN,
-            'danger': RED,
             'locator': WHITE,
             'detector': RED
         }
     }
     
-    # Значения по умолчанию для игрока
-    PLAYER_DEFAULT_RADIUS = 10
-    PLAYER_DEFAULT_SPEED = 3.5
-        
     @classmethod
     def load_settings(cls) -> dict:
         """Загружает настройки из JSON файла"""

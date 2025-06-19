@@ -11,8 +11,22 @@ class Main:
         self.screen = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
         pygame.display.set_caption("Scanner Sombre: Invisible Walls")
         
-        self.game_controller = GameController(self.screen)
-        self.menu_controller = MenuController(self.screen)
+        # Загрузка звуков
+        self.sounds = {
+            'click': pygame.mixer.Sound('assets/sounds/click.wav'),
+            'locator': pygame.mixer.Sound('assets/sounds/locator.wav'),
+            'detector': pygame.mixer.Sound('assets/sounds/detector.wav'),
+            'win': pygame.mixer.Sound('assets/sounds/win.wav'),
+            'lose': pygame.mixer.Sound('assets/sounds/lose.wav')
+        }
+        
+        # Установка громкости
+        for sound_name, sound in self.sounds.items():
+            if sound_name in Config.SOUND_VOLUMES:
+                sound.set_volume(Config.SOUND_VOLUMES[sound_name])
+        
+        self.game_controller = GameController(self.screen, self.sounds)
+        self.menu_controller = MenuController(self.screen, self.sounds)
         self.menu_controller.model.game = self.game_controller
         
     def run(self):

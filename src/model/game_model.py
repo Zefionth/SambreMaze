@@ -91,11 +91,15 @@ class GameModel:
                 self.game_won = True
     
     def _trigger_game_over(self):
-        """Активирует состояние поражения с визуальными эффектами."""
+        """Активирует состояние поражения с визуальными эффектами"""
         self.game_over = True
+        
         self.particles.append(Particle(
             self.player.pos[0], self.player.pos[1], 
-            self.settings['colors']['danger'], Config.GAMEOVER_PARTICLE_SIZE, Config.GAMEOVER_PARTICLE_LIFETIME))
+            Config.RED,
+            Config.GAMEOVER_PARTICLE_SIZE, 
+            Config.GAMEOVER_PARTICLE_LIFETIME
+        ))
 
     def _update_particles_and_points(self, dt: float, current_time: int):
         """Обновляет состояние частиц и временных точек."""

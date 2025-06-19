@@ -4,8 +4,9 @@ from src.model.menu_model import MenuModel
 from src.view.menu_view import MenuView
 
 class MenuController:
-    def __init__(self, screen):
+    def __init__(self, screen, sounds):
         self.screen = screen
+        self.sounds = sounds
         self.model = MenuModel()
         self.view = MenuView(screen)
         self.active = True
@@ -19,15 +20,22 @@ class MenuController:
             if event.type == pygame.QUIT:
                 return False
 
+            # Звук для всех UI взаимодействий
+            ui_interacted = False
+            
             if self.model.current_menu == "main":
                 for button in self.model.main_menu_buttons:
                     button.check_hover(mouse_pos)
                     if button.is_clicked(mouse_pos, mouse_click):
+                        ui_interacted = True
                         if button.text == "Начать игру":
+                            self.sounds['click'].play()
                             self.start_game = True
                         elif button.text == "Настройки":
+                            self.sounds['click'].play()
                             self.model.current_menu = "settings"
                         elif button.text == "Выход":
+                            self.sounds['click'].play()
                             return False
 
             elif self.model.current_menu == "settings":
@@ -35,6 +43,8 @@ class MenuController:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for picker in self.model.color_pickers:
                         if picker.rect.collidepoint(event.pos):
+                            ui_interacted = True
+                            self.sounds['click'].play()
                             self.model.active_color_picker = picker
                             self.model.update_color_sliders()
                             self.model.apply_settings_immediately()
@@ -58,6 +68,7 @@ class MenuController:
                 for slider in self.model.settings_sliders:
                     if slider.handle_event(event):
                         slider_changed = True
+                        self.sounds['click'].play()
                 
                 if slider_changed:
                     self.model.apply_settings_immediately()
@@ -67,12 +78,18 @@ class MenuController:
                 for button in self.model.settings_buttons:
                     button.check_hover(mouse_pos)
                     if button.is_clicked(mouse_pos, mouse_click):
+                        ui_interacted = True
+                        self.sounds['click'].play()
                         if button.text == "Сброс":
                             self.model.reset_to_default()
                         elif button.text == "Сохранить":
                             self.model.save_settings()
                         elif button.text == "Назад":
                             self.model.current_menu = "main"
+            
+            # Воспроизведение звука UI
+            if ui_interacted and mouse_click and event.type == pygame.MOUSEBUTTONDOWN:
+                self.sounds['click'].play()
 
         return True
 
@@ -90,5 +107,5 @@ class MenuController:
             settings_buttons=self.model.settings_buttons,
             active_picker=self.model.active_color_picker,
             color_sliders=self.model.color_components,
-            colors=self.model.settings['colors']
+            colors={}
         )

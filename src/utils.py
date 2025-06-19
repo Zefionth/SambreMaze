@@ -1,7 +1,5 @@
 """Вспомогательные утилиты"""
 import pygame
-import math
-from src.config import Config
 
 def center_text(surface, text_surface) -> tuple:
     """Центрирует текст на поверхности"""

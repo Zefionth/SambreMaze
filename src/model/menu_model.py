@@ -33,15 +33,12 @@ class MenuModel:
             Slider(150, 400, 200, 20, 100, 1000, self.settings['detector_cooldown'], "КД детектора"),
         ]
 
-        # Цветовые пикеры
+        # Цветовые пикеры (только необходимые)
         self.color_pickers = [
-            ColorPicker(450, 150, 50, 50, self.settings['colors']['background'], "Фон"),
-            ColorPicker(450, 220, 50, 50, self.settings['colors']['player'], "Игрок"),
-            ColorPicker(450, 290, 50, 50, self.settings['colors']['walls'], "Стены"),
-            ColorPicker(450, 360, 50, 50, self.settings['colors']['exit'], "Выход"),
-            ColorPicker(450, 430, 50, 50, self.settings['colors']['danger'], "Опасность"),
-            ColorPicker(550, 150, 50, 50, self.settings['colors']['locator'], "Локатор"),
-            ColorPicker(550, 220, 50, 50, self.settings['colors']['detector'], "Детектор")
+            ColorPicker(450, 150, 50, 50, self.settings['colors']['player'], "Игрок"),
+            ColorPicker(450, 220, 50, 50, self.settings['colors']['exit'], "Выход"),
+            ColorPicker(450, 290, 50, 50, self.settings['colors']['locator'], "Локатор"),
+            ColorPicker(450, 360, 50, 50, self.settings['colors']['detector'], "Детектор")
         ]
 
         # RGB слайдеры для активного цветового пикера
@@ -71,13 +68,10 @@ class MenuModel:
             'locator_cooldown': int(self.settings_sliders[4].value),
             'detector_cooldown': int(self.settings_sliders[5].value),
             'colors': {
-                'background': self.color_pickers[0].color,
-                'player': self.color_pickers[1].color,
-                'walls': self.color_pickers[2].color,
-                'exit': self.color_pickers[3].color,
-                'danger': self.color_pickers[4].color,
-                'locator': self.color_pickers[5].color,
-                'detector': self.color_pickers[6].color
+                'player': self.color_pickers[0].color,
+                'exit': self.color_pickers[1].color,
+                'locator': self.color_pickers[2].color,
+                'detector': self.color_pickers[3].color
             }
         }
         Config.save_settings(self.settings)
@@ -103,15 +97,7 @@ class MenuModel:
             self.settings_sliders[i].update_knob()
         
         # Сбрасываем цветовые пикеры
-        color_keys = [
-            'background',
-            'player',
-            'walls',
-            'exit',
-            'danger',
-            'locator',
-            'detector'
-        ]
+        color_keys = ['player', 'exit', 'locator', 'detector']
         for i, key in enumerate(color_keys):
             self.color_pickers[i].color = list(default['colors'][key])
         
@@ -138,13 +124,10 @@ class MenuModel:
             'locator_cooldown': int(self.settings_sliders[4].value),
             'detector_cooldown': int(self.settings_sliders[5].value),
             'colors': {
-                'background': self.color_pickers[0].color,
-                'player': self.color_pickers[1].color,
-                'walls': self.color_pickers[2].color,
-                'exit': self.color_pickers[3].color,
-                'danger': self.color_pickers[4].color,
-                'locator': self.color_pickers[5].color,
-                'detector': self.color_pickers[6].color
+                'player': self.color_pickers[0].color,
+                'exit': self.color_pickers[1].color,
+                'locator': self.color_pickers[2].color,
+                'detector': self.color_pickers[3].color
             }
         }
         if hasattr(self, 'game'):

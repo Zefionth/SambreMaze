@@ -24,7 +24,7 @@ class GameView:
         
     def draw(self, game_state):
         """Основной метод отрисовки игрового состояния"""
-        self._clear_screen(game_state['colors']['background'])
+        self._clear_screen(Config.DARK)
         self._draw_game_world(game_state)
         self._draw_ui(game_state)
         pygame.display.flip()
@@ -43,19 +43,23 @@ class GameView:
         self._draw_particles(game_state['particles'])
         self._draw_player(game_state['player'], game_state['colors']['player'])
         self._draw_exit(game_state['maze'], game_state['cell_size'], game_state['colors']['exit'])
+        
+        # Отрисовка точек локатора
         self._draw_points(
             game_state['locator_points'], 
             game_state['colors']['locator'], 
             Config.LOCATOR_PULSE_FACTOR, 
             Config.LOCATOR_BASE_RADIUS,
-            game_state['point_lifetime']  # Добавлен параметр
+            game_state['point_lifetime']
         )
+        
+        # Отрисовка точек и волн детектора
         self._draw_points(
             game_state['detector_points'], 
-            game_state['colors']['danger'], 
+            game_state['colors']['detector'], 
             Config.DETECTOR_PULSE_FACTOR, 
             Config.DETECTOR_BASE_RADIUS,
-            game_state['point_lifetime']  # Добавлен параметр
+            game_state['point_lifetime']
         )
         self._draw_detector_waves(game_state['detector_lines'], game_state['colors']['detector'])
         
@@ -219,14 +223,14 @@ class GameView:
             text = self.font_large.render(
                 "ТЫ ПОБЕДИЛ!", 
                 True, 
-                normalize_color(colors['exit'])[:3]
+                Config.GREEN
             )
             self._draw_centered_text(text)
         elif game_over:
             text = self.font_large.render(
                 "ИГРА ОКОНЧЕНА", 
                 True, 
-                normalize_color(colors['danger'])[:3]
+                Config.RED
             )
             self._draw_centered_text(text)
             
