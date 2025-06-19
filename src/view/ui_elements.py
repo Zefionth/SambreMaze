@@ -12,7 +12,7 @@ class Button:
         self.color = color
         self.hover_color = hover_color
         self.is_hovered = False
-        self.font = pygame.font.SysFont('Arial', Config.UI_FONT_SIZE)
+        self.font = pygame.font.SysFont(Config.FONT_NAME, Config.UI_FONT_SIZE)
 
     def draw(self, surface):
         """Отрисовывает кнопку"""
@@ -45,7 +45,7 @@ class Slider:
         self.max = max_val
         self.value = initial_val
         self.text = text
-        self.font = pygame.font.SysFont('Arial', Config.UI_FONT_SIZE)
+        self.font = pygame.font.SysFont(Config.FONT_NAME, Config.UI_FONT_SIZE)
         self.dragging = False
         self.update_knob()
 
@@ -86,7 +86,7 @@ class ColorPicker:
         self.rect = pygame.Rect(x, y, width, height)
         self.color = list(color)
         self.text = text
-        self.font = pygame.font.SysFont('Arial', Config.UI_FONT_SIZE)
+        self.font = pygame.font.SysFont(Config.FONT_NAME, Config.UI_FONT_SIZE)
         self.active = False
 
     def draw(self, surface):

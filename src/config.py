@@ -62,7 +62,11 @@ class Config:
     PLAYER_GLOW_FACTOR = 7.5
     
     # Настройки UI
+    FONT_NAME = 'Arial'
+    TITLE_FONT_SIZE = 64
+    SETTINGS_FONT_SIZE = 48
     UI_FONT_SIZE = 24
+    INFO_FONT_SIZE = 20
     UI_BORDER_WIDTH = 2
     BUTTON_WIDTH = 200
     BUTTON_HEIGHT = 50

@@ -17,6 +17,8 @@ class GameController:
         self.show_path = False
         self.game_won_sound_played = False
         self.game_over_sound_played = False
+        self.locator_sound_playing = False
+        self.detector_cooldown_active = False
 
     def start_game(self):
         """Начинает новую игру"""
@@ -24,6 +26,8 @@ class GameController:
         self.return_to_menu = False
         self.game_won_sound_played = False
         self.game_over_sound_played = False
+        self.locator_sound_playing = False
+        self.detector_cooldown_active = False
 
     def handle_events(self) -> bool:
         """Обрабатывает игровые события"""
@@ -42,6 +46,7 @@ class GameController:
                     elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:  # Menu
                         self.sounds['click'].play()
                         self.sounds['locator'].stop()
+                        self.locator_sound_playing = False
                         self.return_to_menu = True
                     elif 230 <= mouse_pos[0] <= 330 and 10 <= mouse_pos[1] <= 40:  # Show Path
                         self.sounds['click'].play()
@@ -52,14 +57,22 @@ class GameController:
                             self.model.path = []
                     else:
                         self.model.left_mouse_down = True
-                        self.sounds['locator'].play()
+                        if not self.locator_sound_playing:
+                            self.sounds['locator'].play(loops=-1)
+                            self.locator_sound_playing = True
                 elif event.button == 3:  # ПКМ - детектор
-                    self.sounds['detector'].play()
-                    self.handle_detector_scan(current_time, mouse_pos)
+                    if not self.detector_cooldown_active and current_time - self.model.last_detector_time > self.settings['detector_cooldown']:
+                        self.sounds['detector'].play()
+                        self.handle_detector_scan(current_time, mouse_pos)
+                        self.detector_cooldown_active = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.model.left_mouse_down = False
-                    self.sounds['locator'].stop()
+                    if self.locator_sound_playing:
+                        self.sounds['locator'].stop()
+                        self.locator_sound_playing = False
+                elif event.button == 3:
+                    self.detector_cooldown_active = False
 
         return True
 

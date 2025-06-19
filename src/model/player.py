@@ -45,21 +45,15 @@ class Player:
         cell_size = game_state['cell_size']
         thin_walls = game_state['thin_walls']
         
-        # Проверяем углы игрока
-        for x, y in self._get_corners(pos):
-            cell_x, cell_y = int(x) // cell_size, int(y) // cell_size
-            if is_valid_cell(cell_x, cell_y, thin_walls) and thin_walls[cell_y][cell_x] == 1:
-                return True
+        # Проверяем только центральную точку игрока
+        cell_x, cell_y = int(pos[0]) // cell_size, int(pos[1]) // cell_size
+        if is_valid_cell(cell_x, cell_y, thin_walls) and thin_walls[cell_y][cell_x] == 1:
+            return True
         return False
-    
+
     def _get_corners(self, pos: list) -> list:
-        """Возвращает углы игрока для проверки коллизий"""
-        return [
-            (pos[0] - self.radius, pos[1] - self.radius),  # Левый верхний
-            (pos[0] + self.radius, pos[1] + self.radius),  # Правый нижний
-            (pos[0] - self.radius, pos[1] + self.radius),  # Левый нижний
-            (pos[0] + self.radius, pos[1] - self.radius)   # Правый верхний
-        ]
+        """Возвращает только центральную точку игрока"""
+        return [(pos[0], pos[1])]
     
     def _try_slide_movement(self, dx: float, dy: float, game_state: dict):
         """Пытается выполнить скольжение вдоль стены"""

@@ -13,8 +13,8 @@ class GameView:
         
     def _init_fonts(self):
         """Инициализация шрифтов"""
-        self.font = pygame.font.SysFont('Arial', 24)
-        self.font_large = pygame.font.SysFont('Arial', 48)
+        self.font = pygame.font.SysFont(Config.FONT_NAME, 24)
+        self.font_large = pygame.font.SysFont(Config.FONT_NAME, 48)
         
     def _init_surfaces(self):
         """Инициализация поверхностей для эффектов"""

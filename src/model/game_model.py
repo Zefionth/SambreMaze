@@ -82,8 +82,10 @@ class GameModel:
         self.player.update_position(move_x, move_y, game_state)
 
     def _check_game_status(self):
-        """Проверяет условия победы или поражения."""
-        cell_x, cell_y = int(self.player.pos[0])//self.cell_size, int(self.player.pos[1])//self.cell_size
+        """Проверяет условия победы или поражения (по центральной точке)"""
+        cell_x = int(self.player.pos[0] // self.cell_size)
+        cell_y = int(self.player.pos[1] // self.cell_size)
+        
         if is_valid_cell(cell_x, cell_y, self.maze):
             if (cell_x, cell_y) in self.danger_zones and not self.game_over:
                 self._trigger_game_over()
