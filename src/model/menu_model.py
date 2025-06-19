@@ -1,44 +1,91 @@
-"""Модель данных для меню"""
+"""Модель данных для меню.
+
+Этот модуль содержит класс MenuModel, который управляет данными меню,
+включая настройки игры, состояние интерфейса и элементы управления.
+"""
+
 from src.config import Config
 from src.view.ui_elements import Button, Slider, ColorPicker
+from typing import Any, Optional
+
 
 class MenuModel:
-    def __init__(self):
+    """Модель данных для меню игры.
+    
+    Отвечает за:
+    - Хранение текущих настроек игры
+    - Управление состоянием меню (главное/настройки)
+    - Инициализацию и обновление элементов интерфейса
+    - Сохранение и сброс настроек
+    - Применение настроек к игровому контроллеру
+    
+    Attributes:
+        settings (dict): Текущие настройки игры
+        current_menu (str): Текущее активное меню ('main' или 'settings')
+        active_color_picker (Optional[ColorPicker]): Активный цветовой пикер
+        main_menu_buttons (List[Button]): Кнопки главного меню
+        settings_sliders (List[Slider]): Слайдеры настроек
+        color_pickers (List[ColorPicker]): Цветовые пикеры
+        color_components (List[Slider]): Слайдеры RGB компонентов
+        settings_buttons (List[Button]): Кнопки меню настроек
+        game (Optional[GameController]): Ссылка на игровой контроллер
+    """
+    
+    def __init__(self) -> None:
+        """Инициализирует модель меню, загружая настройки и создавая UI."""
         self.settings = Config.load_settings()
         self.current_menu = "main"
-        self.active_color_picker = None
+        self.active_color_picker: Optional[ColorPicker] = None
+        self.game: Optional[Any] = None
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
+        """Инициализирует элементы пользовательского интерфейса."""
         center_x = Config.WIDTH // 2
         button_width, button_height = Config.BUTTON_WIDTH, Config.BUTTON_HEIGHT
         
         # Кнопки главного меню
         self.main_menu_buttons = [
-            Button(center_x - 100, 250, button_width, button_height, 
-                 "Начать игру", Config.GREEN, Config.BUTTON_HOVER_GREEN),
-            Button(center_x - 100, 320, button_width, button_height,
-                 "Настройки", Config.BLUE, Config.BUTTON_HOVER_BLUE),
-            Button(center_x - 100, 390, button_width, button_height,
-                 "Выход", Config.RED, Config.BUTTON_HOVER_RED)
+            Button(
+                center_x - 100, 250, button_width, button_height,
+                "Начать игру", Config.GREEN, Config.BUTTON_HOVER_GREEN
+            ),
+            Button(
+                center_x - 100, 320, button_width, button_height,
+                "Настройки", Config.BLUE, Config.BUTTON_HOVER_BLUE
+            ),
+            Button(
+                center_x - 100, 390, button_width, button_height,
+                "Выход", Config.RED, Config.BUTTON_HOVER_RED
+            )
         ]
 
         # Слайдеры настроек
         self.settings_sliders = [
-            Slider(150, 150, 200, 20, 5, 20, self.settings['player_radius'], "Размер игрока"),
-            Slider(150, 200, 200, 20, 1, 10, self.settings['player_speed'], "Скорость игрока"),
-            Slider(150, 250, 200, 20, 50, 300, self.settings['fog_radius'], "Радиус видимости"),
-            Slider(150, 300, 200, 20, 500, 5000, self.settings['point_lifetime'], "Время жизни точек"),
-            Slider(150, 350, 200, 20, 10, 100, self.settings['locator_cooldown'], "КД локатора"),
-            Slider(150, 400, 200, 20, 100, 1000, self.settings['detector_cooldown'], "КД детектора"),
+            Slider(150, 150, 200, 20, 5, 20, 
+                   self.settings['player_radius'], "Размер игрока"),
+            Slider(150, 200, 200, 20, 1, 10, 
+                   self.settings['player_speed'], "Скорость игрока"),
+            Slider(150, 250, 200, 20, 50, 300, 
+                   self.settings['fog_radius'], "Радиус видимости"),
+            Slider(150, 300, 200, 20, 500, 5000, 
+                   self.settings['point_lifetime'], "Время жизни точек"),
+            Slider(150, 350, 200, 20, 10, 100, 
+                   self.settings['locator_cooldown'], "КД локатора"),
+            Slider(150, 400, 200, 20, 100, 1000, 
+                   self.settings['detector_cooldown'], "КД детектора"),
         ]
 
-        # Цветовые пикеры (только необходимые)
+        # Цветовые пикеры
         self.color_pickers = [
-            ColorPicker(450, 150, 50, 50, self.settings['colors']['player'], "Игрок"),
-            ColorPicker(450, 220, 50, 50, self.settings['colors']['exit'], "Выход"),
-            ColorPicker(450, 290, 50, 50, self.settings['colors']['locator'], "Локатор"),
-            ColorPicker(450, 360, 50, 50, self.settings['colors']['detector'], "Детектор")
+            ColorPicker(450, 150, 50, 50, 
+                        self.settings['colors']['player'], "Игрок"),
+            ColorPicker(450, 220, 50, 50, 
+                        self.settings['colors']['exit'], "Выход"),
+            ColorPicker(450, 290, 50, 50, 
+                        self.settings['colors']['locator'], "Локатор"),
+            ColorPicker(450, 360, 50, 50, 
+                        self.settings['colors']['detector'], "Детектор")
         ]
 
         # RGB слайдеры для активного цветового пикера
@@ -50,16 +97,22 @@ class MenuModel:
 
         # Кнопки настроек
         self.settings_buttons = [
-            Button(center_x - 210, 500, 100, 50,
-                 "Сброс", Config.GRAY, Config.BUTTON_HOVER_GRAY),
-            Button(center_x - 100, 500, 200, 50,
-                 "Сохранить", Config.GREEN, Config.BUTTON_HOVER_GREEN),
-            Button(center_x - 100, 570, 200, 50,
-                 "Назад", Config.RED, Config.BUTTON_HOVER_RED)
+            Button(
+                center_x - 210, 500, 100, 50,
+                "Сброс", Config.GRAY, Config.BUTTON_HOVER_GRAY
+            ),
+            Button(
+                center_x - 100, 500, 200, 50,
+                "Сохранить", Config.GREEN, Config.BUTTON_HOVER_GREEN
+            ),
+            Button(
+                center_x - 100, 570, 200, 50,
+                "Назад", Config.RED, Config.BUTTON_HOVER_RED
+            )
         ]
 
-    def save_settings(self):
-        """Сохраняет текущие настройки в файл"""
+    def save_settings(self) -> None:
+        """Сохраняет текущие настройки в файл и обновляет модель."""
         self.settings = {
             'player_radius': int(self.settings_sliders[0].value),
             'player_speed': float(self.settings_sliders[1].value),
@@ -76,14 +129,14 @@ class MenuModel:
         }
         Config.save_settings(self.settings)
     
-    def reset_to_default(self):
-        """Сбрасывает настройки к значениям по умолчанию"""
+    def reset_to_default(self) -> None:
+        """Сбрасывает настройки к значениям по умолчанию."""
         default = Config.DEFAULT_SETTINGS
         
         # Обновляем текущие настройки
         self.settings = default.copy()
         
-        # Сбрасываем слайдеры
+        # Сбрасываем слайдеры основных настроек
         slider_keys = [
             'player_radius',
             'player_speed',
@@ -108,14 +161,15 @@ class MenuModel:
         # Применяем изменения немедленно
         self.apply_settings_immediately()
 
-    def update_color_sliders(self):
-        """Обновляет слайдеры RGB при выборе цветового пикера"""
+    def update_color_sliders(self) -> None:
+        """Обновляет слайдеры RGB при выборе цветового пикера."""
         if self.active_color_picker:
             for i in range(3):
                 self.color_components[i].value = self.active_color_picker.color[i]
+                self.color_components[i].update_knob()
     
-    def apply_settings_immediately(self):
-        """Применяет настройки с проверкой всех ключей"""
+    def apply_settings_immediately(self) -> None:
+        """Применяет текущие настройки к игровому контроллеру."""
         temp_settings = {
             'player_radius': int(self.settings_sliders[0].value),
             'player_speed': float(self.settings_sliders[1].value),
@@ -130,5 +184,5 @@ class MenuModel:
                 'detector': self.color_pickers[3].color
             }
         }
-        if hasattr(self, 'game'):
+        if hasattr(self, 'game') and self.game:
             self.game.apply_settings(temp_settings)

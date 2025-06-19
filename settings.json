@@ -1,5 +1,5 @@
 {
-    "player_radius": 10,
+    "player_radius": 5,
     "player_speed": 3.5,
     "fog_radius": 150,
     "point_lifetime": 2500,
