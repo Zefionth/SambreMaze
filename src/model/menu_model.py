@@ -44,7 +44,7 @@ class MenuModel:
         center_x = Config.WIDTH // 2
         button_width, button_height = Config.BUTTON_WIDTH, Config.BUTTON_HEIGHT
         
-        # Кнопки главного меню
+        # кнопки главного меню
         self.main_menu_buttons = [
             Button(
                 center_x - 100, 250, button_width, button_height,
@@ -60,7 +60,7 @@ class MenuModel:
             )
         ]
 
-        # Слайдеры настроек
+        # слайдеры настроек
         self.settings_sliders = [
             Slider(150, 150, 200, 20, 5, 20, 
                    self.settings['player_radius'], "Размер игрока"),
@@ -76,7 +76,7 @@ class MenuModel:
                    self.settings['detector_cooldown'], "КД детектора"),
         ]
 
-        # Цветовые пикеры
+        # цветовые пикеры
         self.color_pickers = [
             ColorPicker(450, 150, 50, 50, 
                         self.settings['colors']['player'], "Игрок"),
@@ -133,10 +133,10 @@ class MenuModel:
         """Сбрасывает настройки к значениям по умолчанию."""
         default = Config.DEFAULT_SETTINGS
         
-        # Обновляем текущие настройки
+        # обновление текущих настроек
         self.settings = default.copy()
         
-        # Сбрасываем слайдеры основных настроек
+        # сброс слайдеров основных настроек
         slider_keys = [
             'player_radius',
             'player_speed',
@@ -149,16 +149,14 @@ class MenuModel:
             self.settings_sliders[i].value = default[key]
             self.settings_sliders[i].update_knob()
         
-        # Сбрасываем цветовые пикеры
+        # сброс цветовых пикеров
         color_keys = ['player', 'exit', 'locator', 'detector']
         for i, key in enumerate(color_keys):
             self.color_pickers[i].color = list(default['colors'][key])
         
-        # Обновляем слайдеры цветов, если активен пикер
         if self.active_color_picker:
             self.update_color_sliders()
         
-        # Применяем изменения немедленно
         self.apply_settings_immediately()
 
     def update_color_sliders(self) -> None:

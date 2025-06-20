@@ -66,11 +66,11 @@ class Particle:
         """
         self.age += dt
         
-        # Обновление позиции на основе скорости
+        # обновление позиции на основе скорости
         self.x += self.velocity[0] * dt * Config.PARTICLE_SPEED_FACTOR
         self.y += self.velocity[1] * dt * Config.PARTICLE_SPEED_FACTOR
         
-        # Проверка времени жизни
+        # проверка времени жизни
         return self.age < self.lifetime
         
     def draw(self, surface: pygame.Surface) -> None:
@@ -79,13 +79,12 @@ class Particle:
         Args:
             surface: Поверхность Pygame для отрисовки
         """
-        # Рассчитываем прозрачность на основе оставшегося времени жизни
+        # рассчитываем прозрачность на основе оставшегося времени жизни
         alpha = int(255 * (1 - self.age / self.lifetime))
         
-        # Создаем цвет с учетом прозрачности
         particle_color = (*self.color, alpha)
         
-        # Отрисовываем частицу как заполненный круг
+        # отрисовываем частицу как заполненный круг
         gfxdraw.filled_circle(
             surface, 
             int(self.x), 

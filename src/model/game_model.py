@@ -173,19 +173,19 @@ class GameModel:
             dt: Время, прошедшее с предыдущего обновления (в секундах)
             current_time: Текущее время в миллисекундах
         """
-        # Обновление частиц
+        # обновление частиц
         self.particles = [p for p in self.particles if p.update(dt)]
         
-        # Обновление свечения игрока
+        # обновление свечения игрока
         self.player.update_glow(dt)
         
-        # Удаление устаревших точек локатора
+        # удаление устаревших точек локатора
         self.locator_points = [
             (x, y, t) for x, y, t in self.locator_points 
             if current_time - t < self.settings['point_lifetime']
         ]
         
-        # Удаление устаревших точек детектора
+        # удаление устаревших точек детектора
         self.detector_points = [
             (x, y, t) for x, y, t in self.detector_points 
             if current_time - t < self.settings['point_lifetime']
@@ -214,7 +214,7 @@ class GameModel:
         cell_top = cell_y * self.cell_size
         cell_bottom = (cell_y + 1) * self.cell_size
         
-        # Рассчитываем расстояния до границ ячейки
+        # расчет расстояния до границ ячейки
         dists = {
             'left': abs(hit_x - cell_left),
             'right': abs(hit_x - cell_right),
@@ -222,7 +222,7 @@ class GameModel:
             'bottom': abs(hit_y - cell_bottom)
         }
         
-        # Определяем ближайшую границу
+        # ближайшая граница
         min_side = min(dists, key=dists.get)
         if min_side == 'left': 
             return (1, 0)

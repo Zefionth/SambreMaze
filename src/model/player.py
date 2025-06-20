@@ -6,7 +6,7 @@
 
 from src.config import Config
 from src.utils import is_valid_cell
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Any
 
 
 class Player:
@@ -61,17 +61,16 @@ class Player:
             dy: Изменение позиции по оси Y (-1, 0, 1)
             game_state: Текущее состояние игры
         """
-        # Не обновляем позицию, если игра завершена
         if game_state['game_over'] or game_state['game_won']:
             return
         
-        # Сохраняем последнюю валидную позицию
+        # последняя валидная позиция
         self.last_valid_pos = self.pos.copy()
         
-        # Рассчитываем новую позицию
+        # рассчет новой позиции
         new_pos = self._calculate_new_position(dx, dy)
         
-        # Проверяем коллизии и обновляем позицию
+        # проверка коллизии и обновление позиции
         if not self._check_collision(new_pos, game_state):
             self.pos = new_pos
         else:
@@ -87,7 +86,7 @@ class Player:
         Returns:
             List[float]: Новая позиция [x, y]
         """
-        # Рассчитываем фактическое смещение с учетом диагонального движения
+        # рассчет смещения с учетом диагонального движения
         if dx != 0 and dy != 0:
             actual_dx = dx * self.speed_diagonal
             actual_dy = dy * self.speed_diagonal
@@ -114,11 +113,11 @@ class Player:
         cell_size = game_state['cell_size']
         thin_walls = game_state['thin_walls']
         
-        # Определяем ячейку, в которой находится игрок
+        # ячейка, в которой находится игрок
         cell_x = int(pos[0] // cell_size)
         cell_y = int(pos[1] // cell_size)
         
-        # Проверяем коллизию с тонкими стенами
+        # проверка коллизии с тонкими стенами
         if is_valid_cell(cell_x, cell_y, thin_walls):
             return thin_walls[cell_y][cell_x] == 1
             
@@ -137,14 +136,14 @@ class Player:
             dy: Направление по Y (-1, 0, 1)
             game_state: Текущее состояние игры
         """
-        # Пробуем движение только по X
+        # только по X
         if dx != 0:
             x_pos = [self.last_valid_pos[0] + dx * self.speed, self.pos[1]]
             if not self._check_collision(x_pos, game_state):
                 self.pos = x_pos
                 return
         
-        # Пробуем движение только по Y
+        # только по Y
         if dy != 0:
             y_pos = [self.pos[0], self.last_valid_pos[1] + dy * self.speed]
             if not self._check_collision(y_pos, game_state):

@@ -6,9 +6,8 @@
 
 import pygame
 from src.config import Config
-from src.utils import center_text
 from src.view.ui_elements import Button, Slider, ColorPicker
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Tuple, Dict, Optional
 
 
 class MenuView:
@@ -93,19 +92,18 @@ class MenuView:
         Args:
             main_buttons: Список кнопок главного меню
         """
-        # Устанавливаем темный фон
         self.screen.fill(Config.DARK)
         
-        # Отрисовываем заголовок
-        title = self.title_font.render("Scanner Sombre", True, Config.WHITE)
+        # заголовок
+        title = self.title_font.render("Sombre Maze", True, Config.WHITE)
         title_rect = title.get_rect(center=(Config.WIDTH // 2, 100))
         self.screen.blit(title, title_rect)
 
-        # Отрисовываем кнопки
+        # кнопки
         for button in main_buttons:
             button.draw(self.screen)
         
-        # Отрисовываем информацию о локаторе (слева)
+        # информация о локаторе (слева главного экрана меню)
         self._draw_tool_info(
             x=50,
             y=500,
@@ -120,7 +118,7 @@ class MenuView:
             color=Config.WHITE
         )
         
-        # Отрисовываем информацию о детекторе (справа)
+        # информация о детекторе (справа главного экрана меню)
         self._draw_tool_info(
             x=Config.WIDTH - 450,
             y=500,
@@ -151,22 +149,22 @@ class MenuView:
             active_picker: Активный цветовой пикер
             color_sliders: Слайдеры RGB компонентов
         """
-        # Устанавливаем светлый фон
-        self.screen.fill((240, 240, 230))
+
+        self.screen.fill(Config.IVORY)
         
-        # Отрисовываем заголовок настроек
+        # заголовок настроек
         title = self.settings_font.render("Настройки", True, Config.BLACK)
         title_rect = title.get_rect(center=(Config.WIDTH // 2, 50))
         self.screen.blit(title, title_rect)
 
-        # Отрисовываем элементы интерфейса
+        # элементы интерфейса
         for slider in settings_sliders:
             slider.draw(self.screen)
 
         for picker in color_pickers:
             picker.draw(self.screen)
 
-        # Если есть активный пикер, отрисовываем RGB слайдеры
+        # если есть активный пикер, отрисовываем RGB слайдеры
         if active_picker:
             for slider in color_sliders:
                 slider.draw(self.screen)
@@ -191,11 +189,11 @@ class MenuView:
             description: Список строк описания
             color: Цвет заголовка (RGB)
         """
-        # Отрисовываем заголовок
+        # заголовок
         title_surface = self.info_font.render(title, True, color)
         self.screen.blit(title_surface, (x, y))
         
-        # Отрисовываем строки описания
+        # строки описания
         for i, line in enumerate(description):
             text_surface = self.info_font.render(line, True, Config.WHITE)
             self.screen.blit(text_surface, (x, y + 40 + i * 30))

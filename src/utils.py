@@ -46,11 +46,11 @@ def normalize_color(
     Returns:
         Tuple[int, int, int, int]: Цвет в формате RGBA
     """
-    # Преобразуем список в кортеж
+    # список в кортеж
     if isinstance(color, list):
         color = tuple(color)
     
-    # Добавляем альфа-канал если его нет
+    # добавление альфа-канала если его нет
     if len(color) == 3:
         return (*color[:3], alpha)
     return color
@@ -95,7 +95,7 @@ def draw_circle(
         color: Цвет круга в формате RGB/RGBA
     """
     try:
-        # Пытаемся использовать сглаженную отрисовку
+        # попытка использовать сглаженную отрисовку
         pygame.gfxdraw.filled_circle(
             surface, 
             int(x), 
@@ -104,10 +104,10 @@ def draw_circle(
             color
         )
     except Exception:
-        # Используем стандартный метод при ошибке
+        # стандартный метод при ошибке
         pygame.draw.circle(
             surface, 
-            color[:3],  # Берем только RGB компоненты
+            color[:3],
             (int(x), int(y)), 
             radius
         )

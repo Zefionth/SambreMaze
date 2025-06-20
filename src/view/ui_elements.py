@@ -8,7 +8,7 @@
 
 import pygame
 from src.config import Config
-from typing import Tuple, Optional, List, Any
+from typing import Tuple
 from pygame.event import Event
 
 
@@ -58,10 +58,10 @@ class Button:
         Args:
             surface: Поверхность для отрисовки
         """
-        # Выбираем цвет в зависимости от состояния наведения
+        # цвет в зависимости от состояния наведения
         color = self.hover_color if self.is_hovered else self.color
         
-        # Отрисовываем прямоугольник кнопки
+        # прямоугольник кнопки
         pygame.draw.rect(surface, color, self.rect)
         pygame.draw.rect(
             surface, 
@@ -70,13 +70,13 @@ class Button:
             Config.UI_BORDER_WIDTH
         )
         
-        # Определяем цвет текста в зависимости от фона
+        # цвет текста в зависимости от фона
         if color == Config.WHITE or color == Config.LIGHT_GRAY:
             text_color = Config.BLACK
         else:
             text_color = Config.WHITE
             
-        # Отрисовываем текст кнопки
+        # текст кнопки
         text_surface = self.font.render(self.text, True, text_color)
         surface.blit(
             text_surface, 
@@ -165,7 +165,7 @@ class Slider:
     def update_knob(self) -> None:
         """Обновляет позицию ползунка на основе текущего значения."""
         value_range = self.max - self.min
-        # Рассчитываем позицию ползунка как процент от диапазона
+        # позиция ползунка как процент от диапазона
         knob_pos = ((self.value - self.min) / value_range) * (self.rect.width - Config.SLIDER_KNOB_WIDTH)
         self.knob_rect.x = self.rect.x + knob_pos
 
@@ -175,7 +175,7 @@ class Slider:
         Args:
             surface: Поверхность для отрисовки
         """
-        # Отрисовываем фон слайдера
+        # фон слайдера
         pygame.draw.rect(surface, Config.LIGHT_GRAY, self.rect)
         pygame.draw.rect(
             surface, 
@@ -184,7 +184,7 @@ class Slider:
             Config.UI_BORDER_WIDTH
         )
         
-        # Отрисовываем ползунок
+        # ползунок
         pygame.draw.rect(surface, Config.BLUE, self.knob_rect)
         pygame.draw.rect(
             surface, 
@@ -193,7 +193,7 @@ class Slider:
             Config.UI_BORDER_WIDTH
         )
         
-        # Отрисовываем текст с текущим значением
+        # текст с текущим значением
         text_surface = self.font.render(
             f"{self.text}: {int(self.value)}", 
             True, 
@@ -222,7 +222,7 @@ class Slider:
             self.dragging = False
             
         elif event.type == pygame.MOUSEMOTION and self.dragging:
-            # Обновляем значение на основе позиции курсора
+            # обновление значения на основе позиции курсора
             relative_x = event.pos[0] - self.rect.x
             percentage = max(0.0, min(1.0, relative_x / self.rect.width))
             self.value = self.min + percentage * (self.max - self.min)
@@ -263,7 +263,7 @@ class ColorPicker:
             text: Текст пикера
         """
         self.rect = pygame.Rect(x, y, width, height)
-        self.color = list(color)  # Сохраняем как список для возможного изменения
+        self.color = list(color)  # сохранение как списка для возможного изменения
         self.text = text
         self.font = pygame.font.SysFont(Config.FONT_NAME, Config.UI_FONT_SIZE)
         self.active = False
@@ -274,7 +274,7 @@ class ColorPicker:
         Args:
             surface: Поверхность для отрисовки
         """
-        # Отрисовываем прямоугольник с текущим цветом
+        # прямоугольник с текущим цветом
         pygame.draw.rect(surface, self.color, self.rect)
         pygame.draw.rect(
             surface, 
@@ -283,7 +283,7 @@ class ColorPicker:
             Config.UI_BORDER_WIDTH
         )
         
-        # Отрисовываем текст пикера
+        # текст пикера
         text_surface = self.font.render(self.text, True, Config.BLACK)
         surface.blit(
             text_surface, 

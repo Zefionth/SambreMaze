@@ -96,7 +96,7 @@ class GameController:
             elif not self.model.game_won and not self.model.game_over:
                 self._handle_locator_activation()
                 
-        elif event.button == 3:  # ПКМ - детектор
+        elif event.button == 3:  # ПКМ
             if not self.model.game_won and not self.model.game_over:
                 self._handle_detector_activation(mouse_pos)
 
@@ -119,20 +119,20 @@ class GameController:
         Returns:
             bool: True если клик был по UI-кнопке, иначе False
         """
-        # Кнопка "Рестарт"
+        # рестарт
         if 10 <= mouse_pos[0] <= 110 and 10 <= mouse_pos[1] <= 40:
             self.sounds['click'].play()
             self.start_game()
             return True
             
-        # Кнопка "Меню"
+        # меню
         elif 120 <= mouse_pos[0] <= 220 and 10 <= mouse_pos[1] <= 40:
             self.sounds['click'].play()
             self._stop_locator_sound()
             self.return_to_menu = True
             return True
             
-        # Кнопка "Путь"
+        # путь
         elif 230 <= mouse_pos[0] <= 330 and 10 <= mouse_pos[1] <= 40:
             self.sounds['click'].play()
             self.model.show_path = not self.model.show_path
@@ -181,13 +181,13 @@ class GameController:
             mouse_pos[0] - self.model.player.pos[0]
         )
         
-        # Получаем данные сканирования из модели
+        # данные сканирования из модели
         wave_points, hit_positions = self.model.add_detector_wave(
             self.model.player.pos, 
             angle
         )
         
-        # Создаем границы конуса сканирования
+        # границы конуса сканирования
         left_bound, right_bound = [], []
         for dist in range(0, self.settings['fog_radius'], Config.DETECTOR_SCAN_STEP):
             angle_left = angle - math.radians(Config.DETECTOR_ANGLE_MIN)
@@ -205,7 +205,7 @@ class GameController:
                 current_time
             ))
 
-        # Сохраняем данные волны в модели
+        # данные волны в модели
         self.model.detector_lines.append({
             'points': wave_points,
             'left_bound': left_bound,
@@ -216,7 +216,7 @@ class GameController:
             'hit_revealed': [False] * len(hit_positions)
         })
 
-        # Создаем визуальные эффекты для опасных зон
+        # визуальные эффекты для опасных зон
         for pos in hit_positions:
             self.model.detector_points.append((*pos, current_time))
             self.model.particles.append(Particle(
@@ -234,13 +234,13 @@ class GameController:
         """
         self.settings = settings
         
-        # Обновление параметров игрока
+        # обновление параметров игрока
         self.model.player.radius = settings.get('player_radius', 10)
         self.model.player.speed = settings.get('player_speed', 3.5)
         self.model.player.speed_diagonal = self.model.player.speed * 0.7071
         self.model.player.color = settings['colors']['player']
         
-        # Обновление игровых параметров
+        # обновление игровых параметров
         self.fog_radius = settings.get('fog_radius', 150)
         self.point_lifetime = settings.get('point_lifetime', 2500)
         self.locator_cooldown = settings.get('locator_cooldown', 25)

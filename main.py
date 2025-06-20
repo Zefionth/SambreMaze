@@ -31,22 +31,22 @@ class Main:
     
     def __init__(self) -> None:
         """Инициализирует игру, создает окно, загружает ресурсы и контроллеры."""
-        # Инициализация Pygame и звуковой системы
+        # инициализация Pygame и звуковой системы
         pygame.init()
         pygame.mixer.init()
         
-        # Создание игрового окна
+        # cоздание игрового окна
         self.screen = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
-        pygame.display.set_caption("Scanner Sombre: Invisible Walls")
+        pygame.display.set_caption("Sombre Maze")
         
-        # Загрузка звуковых эффектов
+        # звуковые эффекты
         self.sounds = self._load_sounds()
         
-        # Создание контроллеров игры и меню
+        # создание контроллеров игры и меню
         self.game_controller = GameController(self.screen, self.sounds)
         self.menu_controller = MenuController(self.screen, self.sounds)
         
-        # Связываем модель меню с игровым контроллером
+        # связываем модель меню с игровым контроллером
         self.menu_controller.model.game = self.game_controller
         
     def _load_sounds(self) -> Dict[str, pygame.mixer.Sound]:
@@ -63,7 +63,7 @@ class Main:
             'lose': pygame.mixer.Sound('assets/sounds/lose.wav')
         }
         
-        # Установка громкости для каждого звука
+        # установка громкости для каждого звука
         for sound_name, sound in sounds.items():
             if sound_name in Config.SOUND_VOLUMES:
                 sound.set_volume(Config.SOUND_VOLUMES[sound_name])
@@ -76,29 +76,29 @@ class Main:
         running = True
         
         while running:
-            # Рассчитываем время, прошедшее с последнего кадра (в секундах)
+            # рассчитываем время, прошедшее с последнего кадра (в секундах)
             dt = clock.tick(60) / 1000.0
             
             if self.menu_controller.active:
-                # Обработка событий и отрисовка меню
+                # обработка событий и отрисовка меню
                 running = self.menu_controller.handle_events()
                 self.menu_controller.update(dt)
                 self.menu_controller.draw()
                 
-                # Проверка необходимости запуска игры
+                # проверка необходимости запуска игры
                 if self.menu_controller.start_game:
                     self._start_game()
             else:
-                # Обработка событий и отрисовка игры
+                # обработка событий и отрисовка игры
                 running = self.game_controller.handle_events()
                 self.game_controller.update(dt)
                 self.game_controller.draw()
                 
-                # Проверка необходимости возврата в меню
+                # проверка необходимости возврата в меню
                 if self.game_controller.return_to_menu:
                     self._return_to_menu()
         
-        # Завершение работы Pygame при выходе из цикла
+        # завершение работы Pygame при выходе из цикла
         pygame.quit()
 
     def _start_game(self) -> None:

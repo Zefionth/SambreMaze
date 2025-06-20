@@ -30,44 +30,43 @@ class PathFinder:
             List[Tuple[int, int]]: Список точек пути от старта до выхода,
                                     или пустой список если путь не найден.
         """
-        # Инициализация открытого списка (очередь с приоритетом)
+        # очередь с приоритетом
         open_set = []
         heapq.heappush(open_set, (0, start))
         
-        # Словари для хранения информации о пути и стоимости
+        # словари для хранения информации о пути и стоимости
         came_from: Dict[Tuple[int, int], Optional[Tuple[int, int]]] = {}
         g_score: Dict[Tuple[int, int], float] = {start: 0}
         f_score: Dict[Tuple[int, int], float] = {start: PathFinder.heuristic(start, exit_pos)}
         
         while open_set:
-            # Извлекаем узел с наименьшей f_score
+            # узел с наименьшей f_score
             current = heapq.heappop(open_set)[1]
             
-            # Если достигли выхода, восстанавливаем путь
             if current == exit_pos:
                 return PathFinder.reconstruct_path(came_from, current)
                 
-            # Проверяем всех соседей текущей клетки
+            # проверка всех соседей текущей клетки
             for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
                 neighbor = (current[0] + dx, current[1] + dy)
                 
-                # Пропускаем невалидные клетки и стены
+                # пропуск невалидных клеток и стен
                 if not PathFinder.is_valid_cell(neighbor[0], neighbor[1], maze):
                     continue
                 if maze[neighbor[1]][neighbor[0]] == 1:
                     continue
                     
-                # Рассчитываем временную g_score
+                # расчет временной g_score
                 tentative_g_score = g_score[current] + 1
                 
-                # Если нашли лучший путь к соседу, обновляем данные
+                # если нашли лучший путь к соседу, обновляем данные
                 if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
                     came_from[neighbor] = current
                     g_score[neighbor] = tentative_g_score
                     f_score[neighbor] = tentative_g_score + PathFinder.heuristic(neighbor, exit_pos)
                     heapq.heappush(open_set, (f_score[neighbor], neighbor))
                     
-        return []  # Путь не найден
+        return []  # путь не найден
 
     @staticmethod
     def is_valid_cell(cell_x: int, cell_y: int, maze: List[List[int]]) -> bool:

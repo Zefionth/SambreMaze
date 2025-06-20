@@ -5,7 +5,7 @@
 """
 
 import random
-from typing import Tuple, List, Dict, Any
+from typing import Tuple, List
 from src.config import Config
 from src.utils import is_valid_cell
 
@@ -36,23 +36,23 @@ class MazeGenerator:
         rows = Config.HEIGHT // Config.CELL_SIZE
         cell_size = Config.CELL_SIZE
         
-        # Инициализация матриц лабиринта и тонких стен
+        # матрицы лабиринта и тонких стен
         maze = [[1 for _ in range(cols)] for _ in range(rows)]
         thin_walls = [[0 for _ in range(cols)] for _ in range(rows)]
         
-        # Создаем центральную стартовую зону
+        # центральная стартовая зона
         MazeGenerator._create_start_zone(maze, cols, rows)
         
-        # Генерация лабиринта алгоритмом поиска в глубину
+        # генерация лабиринта
         MazeGenerator._generate_with_dfs(maze, cols, rows)
         
-        # Создание выхода
+        # создание выхода
         MazeGenerator._create_exit(maze, cols, rows)
         
-        # Создание опасных зон
+        # создание опасных зон
         danger_zones = MazeGenerator._create_danger_zones(maze, cols, rows)
         
-        # Создание тонких стен
+        # создание тонких стен
         MazeGenerator._create_thin_walls(maze, thin_walls, danger_zones, cols, rows)
         
         return thin_walls, maze, danger_zones, cell_size
@@ -88,7 +88,7 @@ class MazeGenerator:
             x, y = stack[-1]
             neighbors = []
             
-            # Проверяем возможные направления
+            # проверяем возможные направления
             for dx, dy in [(-2, 0), (2, 0), (0, -2), (0, 2)]:
                 nx, ny = x + dx, y + dy
                 if is_valid_cell(nx, ny, maze) and maze[ny][nx] == 1:
@@ -113,10 +113,10 @@ class MazeGenerator:
         """
         exit_side = random.randint(0, 3)
         exit_pos = {
-            0: (random.randint(1, cols - 2), 0),      # Верхняя граница
-            1: (cols - 1, random.randint(1, rows - 2)),  # Правая граница
-            2: (random.randint(1, cols - 2), rows - 1),  # Нижняя граница
-            3: (0, random.randint(1, rows - 2))        # Левая граница
+            0: (random.randint(1, cols - 2), 0),         # верхняя граница
+            1: (cols - 1, random.randint(1, rows - 2)),  # правая граница
+            2: (random.randint(1, cols - 2), rows - 1),  # нижняя граница
+            3: (0, random.randint(1, rows - 2))          # левая граница
         }
         exit_x, exit_y = exit_pos[exit_side]
         if is_valid_cell(exit_x, exit_y, maze):

@@ -5,10 +5,10 @@
 """
 
 import pygame
-from typing import List, Tuple, Dict, Any
+from typing import Tuple, Dict
 from src.model.menu_model import MenuModel
 from src.view.menu_view import MenuView
-from src.view.ui_elements import Button, Slider, ColorPicker
+from src.view.ui_elements import Slider
 
 
 class MenuController:
@@ -101,7 +101,7 @@ class MenuController:
         Args:
             mouse_pos: Позиция курсора (x, y)
         """
-        # Обработка цветовых пикеров
+        # обработка цветовых пикеров
         for picker in self.model.color_pickers:
             if picker.rect.collidepoint(mouse_pos):
                 self.sounds['click'].play()
@@ -110,14 +110,14 @@ class MenuController:
                 self.model.apply_settings_immediately()
                 return
         
-        # Обработка слайдеров настроек
+        # обработка слайдеров настроек
         for slider in self.model.settings_sliders:
             if slider.knob_rect.collidepoint(mouse_pos):
                 self.sounds['click'].play()
                 slider.dragging = True
                 return
         
-        # Обработка RGB слайдеров
+        # обработка RGB слайдеров
         if self.model.active_color_picker:
             for slider in self.model.color_components:
                 if slider.knob_rect.collidepoint(mouse_pos):
@@ -125,7 +125,7 @@ class MenuController:
                     slider.dragging = True
                     return
         
-        # Обработка кнопок настроек
+        # обработка кнопок настроек
         for button in self.model.settings_buttons:
             if button.rect.collidepoint(mouse_pos):
                 self.sounds['click'].play()
@@ -143,7 +143,7 @@ class MenuController:
         Args:
             mouse_pos: Позиция курсора (x, y)
         """
-        # Обновление состояния наведения для кнопок
+        # обновление состояния наведения для кнопок
         buttons = (
             self.model.main_menu_buttons 
             if self.model.current_menu == "main"
@@ -152,7 +152,7 @@ class MenuController:
         for button in buttons:
             button.check_hover(mouse_pos)
         
-        # Обработка перетаскивания слайдеров
+        # обработка перетаскивания слайдеров
         self._update_dragging_sliders(mouse_pos)
 
     def _update_dragging_sliders(self, mouse_pos: Tuple[int, int]) -> None:
@@ -161,7 +161,7 @@ class MenuController:
         Args:
             mouse_pos: Позиция курсора (x, y)
         """
-        # Слайдеры основных настроек
+        # слайдеры основных настроек
         for slider in self.model.settings_sliders:
             if slider.dragging:
                 self._update_slider_value(slider, mouse_pos)
@@ -209,7 +209,6 @@ class MenuController:
         Args:
             dt: Время, прошедшее с предыдущего обновления (в секундах)
         """
-        # В текущей реализации не требует обновления
         pass
 
     def draw(self) -> None:

@@ -9,7 +9,7 @@ import pygame
 import math
 import random
 from src.config import Config
-from typing import List, Tuple, Optional, Dict, Any
+from typing import List, Tuple, Any
 from src.utils import is_valid_cell
 
 
@@ -120,13 +120,13 @@ class LocatorScanner(Scanner):
         """
         current_time = pygame.time.get_ticks()
         
-        # Проверка времени перезарядки
+        # проверка времени перезарядки
         if current_time - self.last_scan_time < self.game_model.settings['locator_cooldown']:
             return []
             
         self.last_scan_time = current_time
         
-        # Добавляем случайное отклонение для реалистичности
+        # случайное отклонение
         angle += random.uniform(
             -Config.LOCATOR_ANGLE_VARIATION, 
             Config.LOCATOR_ANGLE_VARIATION
@@ -135,14 +135,14 @@ class LocatorScanner(Scanner):
         closest_hit = None
         closest_dist = float('inf')
         
-        # Сканируем лучом до первой преграды
+        # скан лучом до первой преграды
         for dist in range(5, Config.LOCATOR_SCAN_LENGTH, Config.LOCATOR_SCAN_STEP):
             x = start_pos[0] + math.cos(angle) * dist
             y = start_pos[1] + math.sin(angle) * dist
             
             cell_x, cell_y = self._get_cell_at_position(x, y)
             
-            # Проверяем, является ли клетка стеной или выходом
+            # проверка, является ли клетка стеной или выходом
             if self._is_valid_cell(cell_x, cell_y) and (
                 self._is_wall(cell_x, cell_y) or 
                 self.game_model.maze[cell_y][cell_x] == 2
@@ -152,12 +152,12 @@ class LocatorScanner(Scanner):
                     closest_hit = (x, y, cell_x, cell_y)
                 break
         
-        # Если найдено столкновение, создаем точку с небольшим смещением
+        # если найдено столкновение, создаем точку с небольшим смещением
         if closest_hit:
             x, y, cell_x, cell_y = closest_hit
             normal = self.game_model.get_wall_normal(cell_x, cell_y, x, y)
             
-            # Добавляем случайное смещение для визуального эффекта
+            # случайное смещение для визуального эффекта
             offset_x = normal[0] * random.uniform(
                 -Config.LOCATOR_HIT_VARIATION, 
                 Config.LOCATOR_HIT_VARIATION
@@ -197,7 +197,7 @@ class DetectorScanner(Scanner):
         """
         current_time = pygame.time.get_ticks()
         
-        # Проверка времени перезарядки
+        # проверка времени перезарядки
         if current_time - self.last_scan_time < self.game_model.settings['detector_cooldown']:
             return [], []
             
@@ -205,28 +205,28 @@ class DetectorScanner(Scanner):
         wave_points = []
         hit_positions = []
         
-        # Сканируем в конусе с разными углами
+        # скан в конусе с разными углами
         for delta in range(Config.DETECTOR_ANGLE_MIN, Config.DETECTOR_ANGLE_MAX, Config.DETECTOR_ANGLE_STEP):
             current_angle = angle + math.radians(delta)
             
-            # Сканируем лучом до преграды
+            # скан лучом до преграды
             for dist in range(0, Config.DETECTOR_SCAN_LENGTH, Config.DETECTOR_SCAN_STEP):
                 x = start_pos[0] + math.cos(current_angle) * dist
                 y = start_pos[1] + math.sin(current_angle) * dist
                 cell_x, cell_y = self._get_cell_at_position(x, y)
 
-                # Прерываем луч при выходе за границы
+                # прерываем луч при выходе за границы
                 if not self._is_valid_cell(cell_x, cell_y):
                     break
 
-                # Добавляем точку в волну
+                # добавление точку в волну
                 wave_points.append((x, y, current_time))
 
-                # Проверяем опасные зоны
+                # проверка опасных зоны
                 if self._is_danger_zone(cell_x, cell_y):
                     hit_positions.append((x, y))
                 
-                # Прерываем луч при столкновении со стеной
+                # прерываем луч при столкновении со стеной
                 if self._is_wall(cell_x, cell_y) or self.game_model.maze[cell_y][cell_x] == 1:
                     break
             

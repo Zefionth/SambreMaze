@@ -1,9 +1,9 @@
 {
-    "player_radius": 5,
+    "player_radius": 10,
     "player_speed": 3.5,
     "fog_radius": 150,
     "point_lifetime": 2500,
-    "locator_cooldown": 25,
+    "locator_cooldown": 10,
     "detector_cooldown": 500,
     "colors": {
         "player": [

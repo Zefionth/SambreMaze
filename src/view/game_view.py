@@ -49,7 +49,7 @@ class GameView:
         
     def _init_surfaces(self) -> None:
         """Инициализирует поверхности для специальных эффектов."""
-        # Создаем поверхность для тумана с альфа-каналом
+        # поверхность для тумана с альфа-каналом
         self.fog_surface = pygame.Surface(
             (Config.WIDTH, Config.HEIGHT), 
             pygame.SRCALPHA
@@ -83,7 +83,7 @@ class GameView:
         Args:
             game_state: Словарь с текущим состоянием игры
         """
-        # Отрисовка пути к выходу (если включено)
+        # путь к выходу (если включено)
         if game_state['show_path']:
             self._draw_path(
                 game_state['path'], 
@@ -91,7 +91,7 @@ class GameView:
                 game_state['colors']['exit']
             )
             
-        # Отрисовка эффектов и объектов
+        # эффекты и объекты
         self._create_fog(game_state['player'].pos, game_state['fog_radius'])
         self._draw_particles(game_state['particles'])
         self._draw_player(game_state['player'], game_state['colors']['player'])
@@ -101,7 +101,7 @@ class GameView:
             game_state['colors']['exit']
         )
         
-        # Отрисовка точек локатора
+        # точки локатора
         self._draw_points(
             game_state['locator_points'], 
             game_state['colors']['locator'], 
@@ -110,7 +110,7 @@ class GameView:
             game_state['point_lifetime']
         )
         
-        # Отрисовка точек и волн детектора
+        # точки и волны детектора
         self._draw_points(
             game_state['detector_points'], 
             game_state['colors']['detector'], 
@@ -123,7 +123,7 @@ class GameView:
             game_state['colors']['detector']
         )
         
-        # Наложение тумана
+        # туман
         if self.fog_surface:
             self.screen.blit(self.fog_surface, (0, 0))
             
@@ -153,7 +153,7 @@ class GameView:
             int(player_pos[0]), 
             int(player_pos[1]), 
             fog_radius, 
-            (0, 0, 0, 0)  # Прозрачный цвет для "дырки"
+            (0, 0, 0, 0)
         )
         
     def _draw_path(
@@ -173,7 +173,7 @@ class GameView:
             return
             
         for i in range(len(path) - 1):
-            # Рассчитываем координаты начала и конца сегмента пути
+            # координаты начала и конца сегмента пути
             start = (
                 path[i][0] * cell_size + cell_size // 2,
                 path[i][1] * cell_size + cell_size // 2
@@ -183,7 +183,7 @@ class GameView:
                 path[i+1][1] * cell_size + cell_size // 2
             )
             
-            # Рисуем линию между точками
+            # линия между точками
             pygame.draw.line(
                 self.screen, 
                 normalize_color(color), 
@@ -215,17 +215,17 @@ class GameView:
             x, y, t = point
             age = (current_time - t) / point_lifetime
             
-            # Пропускаем устаревшие точки
+            # пропуск устаревших точек
             if age >= 1.0:
                 continue
                 
-            # Рассчитываем прозрачность и радиус с пульсацией
+            # рачсет прозрачности и радиуса с пульсацией
             alpha = int(255 * (1 - age))
             pulse = math.sin(self.pulse_time) * pulse_factor
             radius = int(base_radius + pulse)
             color = normalize_color(base_color, alpha)
             
-            # Отрисовываем точку
+            # сама точка
             draw_circle(self.screen, x, y, radius, color)
             
     def _draw_particles(self, particles: List[Any]) -> None:
@@ -254,7 +254,7 @@ class GameView:
             mouse_pos[0] - player.pos[0]
         )
         
-        # Рассчитываем вершины треугольника
+        # рассчет вершин треугольника
         points = [
             (
                 player.pos[0] + math.cos(angle) * player.radius * Config.PLAYER_DIRECTION_SIZE,
@@ -270,12 +270,12 @@ class GameView:
             )
         ]
         
-        # Рассчитываем прозрачность с учетом свечения
+        # рассчет прозрачности с учетом свечения
         alpha = Config.PLAYER_GLOW_MIN + int(player.glow * Config.PLAYER_GLOW_FACTOR)
         alpha = min(255, max(Config.PLAYER_GLOW_MIN, alpha))
         color = normalize_color(base_color, alpha)
         
-        # Пытаемся использовать сглаженный полигон, иначе обычный
+        # пытаемся использовать сглаженный полигон, иначе обычный
         try:
             gfxdraw.filled_polygon(self.screen, points, color)
         except Exception:
@@ -296,7 +296,7 @@ class GameView:
         """
         for y in range(len(maze)):
             for x in range(len(maze[0])):
-                if maze[y][x] == 2:  # 2 - идентификатор выхода
+                if maze[y][x] == 2:  # 2 это идентификатор выхода
                     exit_rect = pygame.Rect(
                         x * cell_size, 
                         y * cell_size, 
@@ -304,14 +304,14 @@ class GameView:
                         cell_size
                     )
                     
-                    # Отрисовываем основной прямоугольник выхода
+                    # основной прямоугольник выхода
                     pygame.draw.rect(
                         self.screen, 
                         normalize_color(base_color), 
                         exit_rect
                     )
                     
-                    # Создаем пульсирующий эффект свечения
+                    # пульсирующий эффект свечения
                     pulse = math.sin(self.pulse_time) * Config.EXIT_PULSE_SIZE
                     pygame.draw.rect(
                         self.screen, 
@@ -333,7 +333,7 @@ class GameView:
         current_time = pygame.time.get_ticks()
         
         for wave in waves:
-            # Проверяем, активна ли еще волна
+            # проверка, активна ли еще волна
             if current_time - wave['start_time'] < wave['duration']:
                 self._draw_wave_points(wave, base_color, current_time)
                 self._draw_wave_lines(wave, base_color, current_time)
@@ -353,7 +353,7 @@ class GameView:
         """
         for point in wave['left_bound'] + wave['right_bound']:
             x, y, t = point
-            # Рассчитываем прозрачность на основе оставшегося времени
+            # прозрачность на основе оставшегося времени
             alpha = int(Config.DETECTOR_ALPHA * 
                        (1 - (current_time - t) / wave['duration']))
             color = normalize_color(base_color, alpha)
@@ -377,12 +377,12 @@ class GameView:
                 x1, y1, t1 = bound[i]
                 x2, y2, _ = bound[i+1]
                 
-                # Рассчитываем прозрачность линии
+                # прозрачность линии
                 alpha = int(Config.DETECTOR_LINE_ALPHA * 
                            (1 - (current_time - t1) / wave['duration']))
                 color = normalize_color(base_color, alpha)
                 
-                # Рисуем линию между точками
+                # линия между точками
                 pygame.draw.line(
                     self.screen, 
                     color, 
